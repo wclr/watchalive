@@ -16,6 +16,7 @@
     "lib",
     "public",
     "README.md",
+    "index.js",
     "watchalive.js",
     "package.json",
     "tests"
