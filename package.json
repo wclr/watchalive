@@ -1,19 +1,19 @@
 {
-  "name": "Watchem",
-  "description": "Watch'em files!",
+  "name": "Watchalive",
+  "description": "Watch Alive!",
   "keywords": [
     "javascript"
   ],
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/whitecolor/watchem.git"
+    "url": "git://github.com/whitecolor/watchalive.git"
   },
   "bugs": {
-    "url": "http://github.com/whitecolor/watchem/issues"
+    "url": "http://github.com/whitecolor/watchalive/issues"
   },
   "engines": [
-    "node >= 0.6.2"
+    "node >= 0.10.0"
   ],
   "license": "MIT",
   "dependencies": {
