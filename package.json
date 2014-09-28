@@ -28,6 +28,6 @@
   "scripts": {},
   "devDependencies": {},
   "bin": {
-    "watchem": "./watchem.js"
+    "watchalive": "./watchalive.js"
   }
 }
