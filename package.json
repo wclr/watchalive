@@ -1,0 +1,33 @@
+{
+  "name": "Watchem",
+  "description": "Watch'em files!",
+  "keywords": [
+    "javascript"
+  ],
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/whitecolor/watchem.git"
+  },
+  "bugs": {
+    "url": "http://github.com/whitecolor/watchem/issues"
+  },
+  "engines": [
+    "node >= 0.6.2"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.9.5",
+    "socket.io": "^1.1.0",
+    "on-headers": "^1.0.0",
+    "async": "^0.9.0",
+    "http-proxy": "^1.4.3",
+    "colors": "^0.6.2"
+  },
+  "files": [],
+  "scripts": {},
+  "devDependencies": {},
+  "bin": {
+    "watchem": "./watchem.js"
+  }
+}
