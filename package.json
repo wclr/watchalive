@@ -12,6 +12,15 @@
   "bugs": {
     "url": "http://github.com/whitecolor/watchalive/issues"
   },
+  "files": [
+    "lib",
+    "public",
+    "README.md",
+    "watchalive.js",
+    "package.json",
+    "tests"
+  ],
+
   "engines": [
     "node >= 0.10.0"
   ],
