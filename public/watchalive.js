@@ -1,5 +1,3 @@
-
-
 (function(){
 
     var addListener = window.addEventListener ?
@@ -86,8 +84,6 @@
             }
 
         })
-        /* whitecolor */
-
     }
 
     function syncConnectStatus(){
@@ -142,7 +138,6 @@
         head.appendChild(style);
     }
 
-
     var socket
 
     function setupSocket(){
@@ -165,25 +160,19 @@
             syncConnectStatus()
         })
 
-        console.log('document.styleSheets.length', document.styleSheets.length)
-
-
-
         socket.on('files', function (changes) {
             //console.log('watchalive files', changed)
             if (connectStatus == 'disconnected') return
             changes.forEach(function(change){
                 var location = window.location
-                url = location.protocol + '//' + location.host + '/' + change.file
+                var url = location.protocol + '//' + location.host + '/' + change.file
                 disableCssStyle(url)
                 addCssStyle(url, change.data)
             })
 
         });
 
-
         socket.on('reload', function (data) {
-            //console.log('watchalive file event')
             if (connectStatus == 'disconnected') return
             reloadPage()
         });
@@ -191,20 +180,8 @@
     }
 
     function init(){
-
         addListener(window, 'load', initUI)
-
         setupSocket()
-
-        //var script = document.createElement('script');
-        //script.src = '/socket.io.js';
-        //document.head.appendChild(script);
-        //
-
-        //
-        //script.onload = function(){
-        //    setupSocket()
-        //}
     }
 
     init()
