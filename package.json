@@ -21,9 +21,9 @@
     "package.json",
     "tests"
   ],
-  "engines": [
+  "engines": {
     "node": ">=0.10.0"
-  ],
+  },
   "license": "MIT",
   "dependencies": {
     "express": "^4.9.5",
