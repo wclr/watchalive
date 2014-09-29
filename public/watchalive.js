@@ -172,7 +172,7 @@
         socket.on('files', function (changes) {
             //console.log('watchalive files', changed)
             if (connectStatus == 'disconnected') return
-            changes.forEach(function(chanage){
+            changes.forEach(function(change){
                 var location = window.location
                 url = location.protocol + '//' + location.host + '/' + change.file
                 disableCssStyle(url)
