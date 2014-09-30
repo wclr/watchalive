@@ -1,2 +1,5 @@
+.c9
 .idea
 node_modules
+npm-debug.log
+tmp
