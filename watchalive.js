@@ -5,7 +5,6 @@ var fs = require('fs'),
     cwd = process.cwd(),
     argv = require('yargs').argv;
 
-
 var configFileName = path.resolve(cwd, argv.config || argv._[0] || 'watchalive.json')
 
 var options = {}
