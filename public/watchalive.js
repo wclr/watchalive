@@ -5,7 +5,8 @@
         function(obj, evt, cb){ obj.attachEvent('on' + evt, cb) }
 
 
-    var connectStatus = 'disconnected'
+    var connectStatus = 'disconnected',
+        options = {}
 
     function getBrowserName(userAgent){
         var regexs = [
@@ -108,7 +109,8 @@
         window.location.reload()
     }
 
-    function disableCssStyle(url){
+    // TODO: is not needed, probably remove
+    function removeCssStyle(url){
         for (var i = 0; i < document.styleSheets.length; i++){
             var ss = document.styleSheets[i]
             if (ss.href == url || ss.ownerNode.innerHTML.indexOf('sourceURL=' + url) >= 0){
@@ -117,6 +119,27 @@
                 var node = ss.ownerNode
                 node.parentNode.removeChild(node)
                 return
+            }
+
+        }
+    }
+
+    function replaceCssStyle(url, data){
+        for (var i = 0; i < document.styleSheets.length; i++){
+            var ss = document.styleSheets[i]
+            if (ss.href == url){
+                //console.log('disableCssStyle ', url)
+                //ss.disabled = true
+                var node = ss.ownerNode
+                node.parentNode.removeChild(node)
+                addCssStyle(url, data)
+                return
+            }
+            if (ss.ownerNode.innerHTML.indexOf('sourceURL=' + url) >= 0){
+                if (options.debug){
+                    console.log('Replacing css style of ' + url)
+                }
+                ss.ownerNode.innerHTML = data + "/*# sourceURL="+ url +" */"
             }
 
         }
@@ -166,8 +189,99 @@
             changes.forEach(function(change){
                 var location = window.location
                 var url = location.protocol + '//' + location.host + '/' + change.file
-                disableCssStyle(url)
-                addCssStyle(url, change.data)
+
+                if (change.file.match(/\.css$/)){
+                    replaceCssStyle(url, change.data)
+                    return
+                }
+
+                if (change.file.match(/\.less$/)){
+                    //console.log('LESS DETECTED', url, less.optimization)
+
+                    if (typeof less == 'object'){
+
+                        //var commentSource = function(source){
+                        //    return source.split('\n').map(function(s){return '/*' + s + '*/'}).join('\n')
+                        //}
+                        //
+
+                        //change.data = change.data
+                            //.replace(/\/\/.*/g, '')
+                            //.replace(/\n/g ,'')
+                            //.replace(/\/\*.*?\*\//g, '')
+
+                        var parseLessFile = function(url, data, callback ){
+                            var pathParts = (url + '').split('/');
+                            pathParts[pathParts.length - 1] = ''; // Remove filename
+
+                            new (less.Parser)({
+                                optimization: less.optimization,
+                                paths: [pathParts.join('/')],
+                                useFileCache: true,
+                                filename: url
+                            }).parse(data, function (e, root) {
+                                    if(e){
+                                        console.log('Error parsing less', e, data);
+                                    } else {
+                                        //var source = data
+                                            //.replace(/\/\/.*/g, '')
+                                            //.replace(/\n/g ,'')
+                                            //.replace(/\/\*.*?\*\//g, '')
+
+                                        //console.log('parseLessFile putting less back', source)
+                                        callback(url, root.toCSS() + '\n/* LESS_SOURCE=' + data +' */\n'
+                                            //'/* LESS SOURCE */\n' + commentSource(data) +'\n/* END OF LESS SOURCE */\n' + root.toCSS()
+                                        )
+                                    }
+                                });
+                        }
+                        var cachedUrl = '/' + change.file
+                        if (less.fileCache && less.fileCache[cachedUrl]){
+                            if (options.debug){
+                                console.log('Replacing less cache of ' + cachedUrl)
+                            }
+
+                            less.fileCache[cachedUrl] = change.data
+
+                            for (var i = 0; i < document.styleSheets.length; i++){
+                                var ss = document.styleSheets[i]
+                                cachedUrl = cachedUrl.replace(/.\less$/, '')
+                                // look for styles that import this one
+                                var match = new RegExp('@import\\s+(\'|")' + cachedUrl + '(\\.less)?(\'|")' )
+                                if (ss.ownerNode.innerHTML.match(match)){
+                                    //console.log('look for ', match)
+                                    var node = ss.ownerNode,
+                                        sourceMatch = node.innerHTML.match(/sourceURL=(.*?) /)
+
+                                    if (sourceMatch){
+                                        var sourceUrl = sourceMatch[1]
+
+                                        var lessData = node.innerHTML.match(/LESS_SOURCE=([\S\s]*?) \*\/\n/)
+                                        //console.log('Replacing style with import', sourceUrl, node.innerHTML.indexOf('LESS_SOURCE='), lessData)
+                                        if (lessData) {
+                                            if (options.debug){
+                                                console.log('Replacing style with import', sourceUrl)
+                                            }
+
+                                            ;(function(node, sourceUrl, lessData){
+
+                                                parseLessFile(sourceUrl, lessData, function(url, parsedData){
+                                                    node.innerHTML = parsedData + '/*# sourceURL='+ sourceUrl +' */'
+                                                })
+
+                                            })(node, sourceUrl, lessData[1])
+
+                                        }
+                                    }
+                                }
+                            }
+
+                        } else {
+                            parseLessFile(url, change.data, replaceCssStyle)
+                        }
+                    }
+                }
+
             })
 
         });
@@ -185,6 +299,14 @@
     }
 
     init()
+
+
+    if (typeof watchalive == 'object'){
+        for (prop in watchalive){
+            options[prop] == watchalive
+        }
+    }
+
 
 })()
 
