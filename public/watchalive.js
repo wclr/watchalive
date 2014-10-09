@@ -290,7 +290,6 @@
             if (connectStatus == 'disconnected') return
             reloadPage()
         });
-
     }
 
     function init(){
@@ -298,14 +297,21 @@
         setupSocket()
     }
 
-    init()
+    setTimeout(function(){
 
-
-    if (typeof watchalive == 'object'){
-        for (prop in watchalive){
-            options[prop] == watchalive
+        if (typeof watchalive == 'object'){
+            for (prop in watchalive){
+                options[prop] == watchalive
+            }
         }
-    }
+
+        init()
+    })
+
+
+
+
+
 
 
 })()
