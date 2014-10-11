@@ -288,7 +288,10 @@
 
         socket.on('reload', function (data) {
             if (connectStatus == 'disconnected') return
-            reloadPage()
+            if (options.reload !== false){
+                reloadPage()
+            }
+
         });
     }
 
