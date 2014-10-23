@@ -300,8 +300,10 @@
         if (document.readyState == 'complete'){
             initUI()
         } else {
-            document.body[window.addEventListener ? 'addEventListener' : 'attachEvent'](
-                window.addEventListener ? "load" : "onload", initUI, false);
+            addListener(window, 'load', initUI)
+
+            //document.body[window.addEventListener ? 'addEventListener' : 'attachEvent'](
+            //    window.addEventListener ? "load" : "onload", initUI, false);
         }
 
         setupSocket()
