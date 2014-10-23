@@ -296,12 +296,19 @@
     }
 
     function init(){
-        addListener(window, 'load', initUI)
+
+        if (document.readyState == 'complete'){
+            initUI()
+        } else {
+            document.body[window.addEventListener ? 'addEventListener' : 'attachEvent'](
+                window.addEventListener ? "load" : "onload", initUI, false);
+        }
+
         setupSocket()
     }
-
+    // to allow watchalive object be defined
+    // after /watchalive.js script tag we use setTimeout
     setTimeout(function(){
-
         if (typeof watchalive == 'object'){
             for (prop in watchalive){
                 options[prop] == watchalive
@@ -310,11 +317,6 @@
 
         init()
     })
-
-
-
-
-
 
 
 })()
