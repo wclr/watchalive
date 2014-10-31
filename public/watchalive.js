@@ -165,7 +165,7 @@
 
     function setupSocket(){
 
-        socket = io.connect('http://localhost');
+        socket = io.connect(location.protocol + '//' + location.hostname);
 
         socket.emit('login', getBrowserName(navigator.userAgent))
 
