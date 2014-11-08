@@ -58,10 +58,13 @@
         color: #fff;\
         font-family: Monaco, monospace;\
         font-size: 12px;\
-        opacity: 0.8;\
+        opacity: 0.1;\
         max-width:400px;\
         z-index: 1000;\
         cursor: pointer;\
+    }\
+    #__watchalive_ui__[thick="true"]{\
+        opacity: 0.8\
     }\
     #__watchalive_ui__.connected{\
         color: #89e583;\
@@ -76,14 +79,17 @@
         elm.innerHTML = markup + 'WATCH ALIVE!'
         document.body.appendChild(elm)
         elm.addEventListener('click', function(){
+            elm.setAttribute('thick', 'true')
             if (connectStatus === 'disconnected'){
                 document.getElementById(elm.id).innerHTML = markup + 'WATCH ALIVE!'
                 reconnect()
+                setTimeout(function(){
+                    elm.setAttribute('thick', 'false')
+                }, 2000)
             } else {
                 document.getElementById(elm.id).innerHTML = markup + ua
                 disconnect()
             }
-
         })
     }
 
@@ -196,19 +202,8 @@
                 }
 
                 if (change.file.match(/\.less$/)){
-                    //console.log('LESS DETECTED', url, less.optimization)
 
                     if (typeof less == 'object'){
-
-                        //var commentSource = function(source){
-                        //    return source.split('\n').map(function(s){return '/*' + s + '*/'}).join('\n')
-                        //}
-                        //
-
-                        //change.data = change.data
-                            //.replace(/\/\/.*/g, '')
-                            //.replace(/\n/g ,'')
-                            //.replace(/\/\*.*?\*\//g, '')
 
                         var parseLessFile = function(url, data, callback ){
                             var pathParts = (url + '').split('/');
