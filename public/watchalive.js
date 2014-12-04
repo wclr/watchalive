@@ -1,100 +1,70 @@
 (function(){
 
+    var io = wio
+
     var addListener = window.addEventListener ?
         function(obj, evt, cb){ obj.addEventListener(evt, cb, false) } :
         function(obj, evt, cb){ obj.attachEvent('on' + evt, cb) }
 
 
     var connectStatus = 'disconnected',
-        options = {}
-
-    function getBrowserName(userAgent){
-        var regexs = [
-            /MS(?:(IE) (1?[0-9]\.[0-9]))/,
-            /(Chrome)\/([0-9]+\.[0-9]+)/,
-            /(Firefox)\/([0-9a-z]+\.[0-9a-z]+)/,
-            /(Opera).*Version\/([0-9]+\.[0-9]+)/,
-            /(PhantomJS)\/([0-9]+\.[0-9]+)/,
-            [/(Android).*Version\/([0-9]+\.[0-9]+).*(Safari)/, function(m){
-                return [m[1], m[3], m[2]].join(' ')
-            }],
-            [/(iPhone).*Version\/([0-9]+\.[0-9]+).*(Safari)/, function(m){
-                return [m[1], m[3], m[2]].join(' ')
-            }],
-            [/(iPad).*Version\/([0-9]+\.[0-9]+).*(Safari)/, function(m){
-                return [m[1], m[3], m[2]].join(' ')
-            }],
-            [/Version\/([0-9]+\.[0-9]+).*(Safari)/, function(m){
-                return [m[2], m[1]].join(' ')
-            }]
-        ]
-        for (var i = 0; i < regexs.length; i++){
-            var regex = regexs[i]
-            var pick = function(m){
-                return m.slice(1).join(' ')
-            }
-            if (regex instanceof Array){
-                pick = regex[1]
-                regex = regex[0]
-            }
-            var match = userAgent.match(regex)
-            if (match){
-                return pick(match)
-            }
+        options = {
+            host: location.origin
         }
-        return userAgent
-    }
+
+    var elm
+    var ua = navigator.userAgent
+    var markup = '\
+        <style>\
+        #__watchalive_ui__{\
+            position: fixed;\
+            bottom: 5px;\
+            right: 5px;\
+            background-color: #444;\
+            padding: 3px;\
+            color: #fff;\
+            font-family: Monaco, monospace;\
+            font-size: 14px;\
+            opacity: 0.1;\
+            max-width:400px;\
+            z-index: 1000;\
+            cursor: pointer;\
+        }\
+        #__watchalive_ui__[thick="true"]{\
+            opacity: 0.8\
+        }\
+        #__watchalive_ui__.connected{\
+            color: #89e583;\
+        }\
+        #__watchalive_ui__.disconnected{\
+            color: #cc7575;\
+        }\
+        </style>'
 
     function initUI(){
-        var ua = navigator.userAgent
-        var markup = '\
-    <style>\
-    #__watchalive_ui__{\
-        position: fixed;\
-        bottom: 5px;\
-        right: 5px;\
-        background-color: #444;\
-        padding: 3px;\
-        color: #fff;\
-        font-family: Monaco, monospace;\
-        font-size: 12px;\
-        opacity: 0.1;\
-        max-width:400px;\
-        z-index: 1000;\
-        cursor: pointer;\
-    }\
-    #__watchalive_ui__[thick="true"]{\
-        opacity: 0.8\
-    }\
-    #__watchalive_ui__.connected{\
-        color: #89e583;\
-    }\
-    #__watchalive_ui__.disconnected{\
-        color: #cc7575;\
-    }\
-    </style>'
-        var elm = document.createElement('div')
+
+        elm = document.createElement('div')
         elm.id = '__watchalive_ui__'
         elm.className = connectStatus
         elm.innerHTML = markup + 'WATCH ALIVE!'
         document.body.appendChild(elm)
+        var opacityTimeout
         elm.addEventListener('click', function(){
             elm.setAttribute('thick', 'true')
-            if (connectStatus === 'disconnected'){
-                document.getElementById(elm.id).innerHTML = markup + 'WATCH ALIVE!'
+            clearTimeout(opacityTimeout)
+            if (isConnected()){
+                disconnect()
+            } else {
                 reconnect()
-                setTimeout(function(){
+                opacityTimeout = setTimeout(function(){
                     elm.setAttribute('thick', 'false')
                 }, 2000)
-            } else {
-                document.getElementById(elm.id).innerHTML = markup + ua
-                disconnect()
+
             }
         })
     }
 
     function syncConnectStatus(){
-        var elm = document.getElementById('__watchalive_ui__')
         if (elm) elm.className = connectStatus
     }
 
@@ -103,34 +73,74 @@
         syncConnectStatus()
     }
 
+    function isConnected(){
+        return connectStatus == 'connected'
+    }
+
     function disconnect(){
+        elm.innerHTML = markup + ua
         setConnectStatus('disconnected')
     }
 
     function reconnect(){
+        elm.innerHTML = markup + 'WATCH ALIVE!'
         setConnectStatus('connected')
+
     }
 
     function reloadPage(){
         window.location.reload()
     }
 
-    // TODO: is not needed, probably remove
-    function removeCssStyle(url){
-        for (var i = 0; i < document.styleSheets.length; i++){
-            var ss = document.styleSheets[i]
-            if (ss.href == url || ss.ownerNode.innerHTML.indexOf('sourceURL=' + url) >= 0){
-                //console.log('disableCssStyle ', url)
-                //ss.disabled = true
-                var node = ss.ownerNode
-                node.parentNode.removeChild(node)
-                return
+    // normalize urls in css against host
+    var normalizeCssUrls = function(fileUrl, data){
+
+        var baseParts, host
+
+        function getNormalizedUrl(url) {
+
+            // if url contains protocol do nothing
+            if(url.indexOf('//') > 0){
+                return url
             }
 
+            // calculate this only if its needed, but for single time
+            if (!baseParts){
+                baseParts = fileUrl.split('/');
+                host = baseParts.slice(0,3).join('/')
+                baseParts.pop()
+            }
+
+            // if url is absolute return host + url
+            if (url[0] == '/'){
+                return host + url
+            }
+
+            var parts = baseParts.slice(3) // remove host part
+            var urlParts = url.split('/');
+
+            urlParts.forEach(function(part){
+                if (part == '.') return
+                if (part == '..'){
+                    parts.pop()
+                }
+                parts.push(part)
+            })
+
+            //console.log('parts', parts)
+
+            return host + '/' + parts.join('/')
         }
+
+        return data.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+            //console.log('getNormalizedUrl', fileUrl, part, getNormalizedUrl(part))
+            return "url(" + getNormalizedUrl(part) + ")";
+        });
     }
 
+
     function replaceCssStyle(url, data){
+        data = normalizeCssUrls(url, data)
         for (var i = 0; i < document.styleSheets.length; i++){
             var ss = document.styleSheets[i]
             if (ss.href == url){
@@ -147,7 +157,6 @@
                 }
                 ss.ownerNode.innerHTML = data + "/*# sourceURL="+ url +" */"
             }
-
         }
     }
 
@@ -171,9 +180,9 @@
 
     function setupSocket(){
 
-        socket = io.connect(location.protocol + '//' + location.hostname);
+        socket = io.connect(options.host);
 
-        socket.emit('login', getBrowserName(navigator.userAgent))
+        socket.emit('login', navigator.userAgent)
 
         socket.on('connected', function (data) {
             if (connectStatus == 'connected'){
@@ -190,93 +199,12 @@
         })
 
         socket.on('files', function (changes) {
-            //console.log('watchalive files', changed)
             if (connectStatus == 'disconnected') return
             changes.forEach(function(change){
-                var location = window.location
-                var url = location.protocol + '//' + location.host + '/' + change.file
-
+                var url = options.host + '/' + change.file
                 if (change.file.match(/\.css$/)){
                     replaceCssStyle(url, change.data)
-                    return
                 }
-
-                if (change.file.match(/\.less$/)){
-
-                    if (typeof less == 'object'){
-
-                        var parseLessFile = function(url, data, callback ){
-                            var pathParts = (url + '').split('/');
-                            pathParts[pathParts.length - 1] = ''; // Remove filename
-
-                            new (less.Parser)({
-                                optimization: less.optimization,
-                                paths: [pathParts.join('/')],
-                                useFileCache: true,
-                                filename: url
-                            }).parse(data, function (e, root) {
-                                    if(e){
-                                        console.log('Error parsing less', e, data);
-                                    } else {
-                                        //var source = data
-                                            //.replace(/\/\/.*/g, '')
-                                            //.replace(/\n/g ,'')
-                                            //.replace(/\/\*.*?\*\//g, '')
-
-                                        //console.log('parseLessFile putting less back', source)
-                                        callback(url, root.toCSS() + '\n/* LESS_SOURCE=' + data +' */\n'
-                                            //'/* LESS SOURCE */\n' + commentSource(data) +'\n/* END OF LESS SOURCE */\n' + root.toCSS()
-                                        )
-                                    }
-                                });
-                        }
-                        var cachedUrl = '/' + change.file
-                        if (less.fileCache && less.fileCache[cachedUrl]){
-                            if (options.debug){
-                                console.log('Replacing less cache of ' + cachedUrl)
-                            }
-
-                            less.fileCache[cachedUrl] = change.data
-
-                            for (var i = 0; i < document.styleSheets.length; i++){
-                                var ss = document.styleSheets[i]
-                                cachedUrl = cachedUrl.replace(/.\less$/, '')
-                                // look for styles that import this one
-                                var match = new RegExp('@import\\s+(\'|")' + cachedUrl + '(\\.less)?(\'|")' )
-                                if (ss.ownerNode.innerHTML.match(match)){
-                                    //console.log('look for ', match)
-                                    var node = ss.ownerNode,
-                                        sourceMatch = node.innerHTML.match(/sourceURL=(.*?) /)
-
-                                    if (sourceMatch){
-                                        var sourceUrl = sourceMatch[1]
-
-                                        var lessData = node.innerHTML.match(/LESS_SOURCE=([\S\s]*?) \*\/\n/)
-                                        //console.log('Replacing style with import', sourceUrl, node.innerHTML.indexOf('LESS_SOURCE='), lessData)
-                                        if (lessData) {
-                                            if (options.debug){
-                                                console.log('Replacing style with import', sourceUrl)
-                                            }
-
-                                            ;(function(node, sourceUrl, lessData){
-
-                                                parseLessFile(sourceUrl, lessData, function(url, parsedData){
-                                                    node.innerHTML = parsedData + '/*# sourceURL='+ sourceUrl +' */'
-                                                })
-
-                                            })(node, sourceUrl, lessData[1])
-
-                                        }
-                                    }
-                                }
-                            }
-
-                        } else {
-                            parseLessFile(url, change.data, replaceCssStyle)
-                        }
-                    }
-                }
-
             })
 
         });
@@ -290,32 +218,60 @@
         });
     }
 
+    var interceptConsole = function(){
+
+        var consoleParam = options.console
+
+        var methods = consoleParam.forEach
+            ? consoleParam
+            : typeof  consoleParam == 'string' ? consoleParam.split(' ') : ['log', 'warn', 'info', 'error']
+
+        methods.forEach(function (m) {
+            var oldMethod = window.console[m]
+            window.console[m] = function () {
+                var args = Array.prototype.slice.call(arguments);
+                var message = args.map(function(a){
+                    //return (typeof a === 'object') ? JSON.stringify(a) : a && a.toString()
+                    return (typeof a === 'object' && a != null) ? '[object]' : a
+                }).join(' ')
+                if (isConnected()){
+                    socket.emit('console.' + m, message)
+                }
+                oldMethod && oldMethod.apply(console, arguments)
+            }
+        })
+
+    }
+
     function init(){
 
+        if (typeof watchalive == 'object'){
+            for (var prop in watchalive){
+                options[prop] = watchalive[prop]
+            }
+        }
+        setupSocket()
+
+        //alert('watchalive' + document.readyState)
         if (document.readyState == 'complete'){
             initUI()
         } else {
+            //alert('watchalive bind')
             addListener(window, 'load', initUI)
-
-            //document.body[window.addEventListener ? 'addEventListener' : 'attachEvent'](
-            //    window.addEventListener ? "load" : "onload", initUI, false);
+            //document.addEventListener("deviceready", initUI, false);
         }
 
-        setupSocket()
+        if (options.console){
+            interceptConsole()
+        }
     }
-    // to allow watchalive object be defined
-    // after /watchalive.js script tag we use setTimeout
-    setTimeout(function(){
-        if (typeof watchalive == 'object'){
-            for (prop in watchalive){
-                options[prop] == watchalive
-            }
-        }
 
+
+    if (typeof watchalive == 'object'){
         init()
-    })
-
+    } else {
+        //if watchalive options are NOT available init with timeout (they may appear!)
+        setTimeout(init)
+    }
 
 })()
-
-
