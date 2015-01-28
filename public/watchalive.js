@@ -9,7 +9,7 @@
 
     var connectStatus = 'disconnected',
         options = {
-            host: location.origin
+            host: location.origin || (location.protocol + '//' + location.host)
         }
 
     var elm
@@ -40,6 +40,15 @@
             color: #cc7575;\
         }\
         </style>'
+
+
+    var debugLog = function(){
+        if (options.debug){
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift('watchalive debug:');
+            console.log.apply(console, args)
+        }
+    }
 
     function initUI(){
 
@@ -127,13 +136,10 @@
                 parts.push(part)
             })
 
-            //console.log('parts', parts)
-
             return host + '/' + parts.join('/')
         }
 
         return data.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
-            //console.log('getNormalizedUrl', fileUrl, part, getNormalizedUrl(part))
             return "url(" + getNormalizedUrl(part) + ")";
         });
     }
@@ -141,20 +147,17 @@
 
     function replaceCssStyle(url, data){
         data = normalizeCssUrls(url, data)
+        debugLog('watchalive: replaceCssStyle', url)
         for (var i = 0; i < document.styleSheets.length; i++){
             var ss = document.styleSheets[i]
             if (ss.href == url){
-                //console.log('disableCssStyle ', url)
-                //ss.disabled = true
                 var node = ss.ownerNode
                 node.parentNode.removeChild(node)
                 addCssStyle(url, data)
                 return
             }
             if (ss.ownerNode.innerHTML.indexOf('sourceURL=' + url) >= 0){
-                if (options.debug){
-                    console.log('Replacing css style of ' + url)
-                }
+                debugLog('replacing css style of ' + url)
                 ss.ownerNode.innerHTML = data + "/*# sourceURL="+ url +" */"
             }
         }
@@ -202,6 +205,7 @@
             if (connectStatus == 'disconnected') return
             changes.forEach(function(change){
                 var url = options.host + '/' + change.file
+                debugLog('change', url)
                 if (change.file.match(/\.css$/)){
                     replaceCssStyle(url, change.data)
                 }
@@ -214,7 +218,6 @@
             if (options.reload !== false){
                 reloadPage()
             }
-
         });
     }
 
