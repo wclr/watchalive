@@ -2,6 +2,44 @@
 
     var io = wio
 
+    // code is stolen from https://github.com/marcelklehr/toposort/blob/master/index.js
+    var toposort = function(nodes, edges) {
+
+        var cursor = nodes.length
+            , sorted = new Array(cursor)
+            , visited = {}
+            , i = cursor
+
+        while (i--) {
+            if (!visited[i]) visit(nodes[i], i, [])
+        }
+
+        return sorted
+
+        function visit(node, i, predecessors) {
+            if(predecessors.indexOf(node) >= 0) {
+                throw new Error('Cyclic dependency: '+JSON.stringify(node))
+            }
+
+            if (visited[i]) return;
+            visited[i] = true
+
+            // outgoing edges
+            var outgoing = edges.filter(function(edge){
+                return edge[0] === node
+            })
+            if (i = outgoing.length) {
+                var preds = predecessors.concat(node)
+                do {
+                    var child = outgoing[--i][1]
+                    visit(child, nodes.indexOf(child), preds)
+                } while (i)
+            }
+
+            sorted[--cursor] = node
+        }
+    }
+
     var addListener = window.addEventListener ?
         function(obj, evt, cb){ obj.addEventListener(evt, cb, false) } :
         function(obj, evt, cb){ obj.attachEvent('on' + evt, cb) }
@@ -48,6 +86,126 @@
             args.unshift('watchalive debug:');
             console.log.apply(console, args)
         }
+    }
+
+
+    var reloadHot = function(changes){
+        var main = System.main
+
+        // remove non standard elements
+        for (var i = document.body.childNodes.length - 1; i > 0 ; i--){
+            var node = document.body.childNodes[i]
+            //node.nodeName == '#text'
+            if (!/^\w+$/i.test(node.nodeName)){
+                $(node).remove()
+                //document.body.removeChild(node)
+            }
+        }
+
+        var loadsMap = System.loadsMap
+
+        var allDependents = {}
+
+        var findDependants = function(module){
+
+            var dependants = {}
+
+            var checkDeps = function(load){
+                if (allDependents[load.name]) return
+                if (load.normalized.indexOf(module) >= 0){
+                    allDependents[load.name] = load
+                    dependants[load.name] = load
+                }
+            }
+
+            // find dependent modules (loads) for changed module
+            return new Promise(function(resolve, reject){
+
+                Promise.all(Object.keys(loadsMap.modules).map(function(module){
+                    var load = loadsMap.modules[module]
+                    var additionalDeps = loadsMap.deps && loadsMap.deps[load.name]
+                    if (additionalDeps){
+                        load.metadata.deps = load.metadata.deps.concat(additionalDeps)
+                    }
+                    return new Promise(function(resolve, reject){
+                        if (load.normalized){
+                            checkDeps(load)
+                            resolve()
+                        } else {
+                            Promise.all(load.metadata.deps.map(function(dep){
+                                return System.normalize(dep, load.name, load.address)
+                            })).then(function(normalized){
+                                load.normalized = normalized
+                                checkDeps(load)
+                                resolve()
+                            })
+                        }
+                    })
+                })).then(function(){
+                    resolve(dependants)
+                })
+            })
+        }
+
+        var findDependantsMulti = function(modules){
+            return new Promise(function(resolve){
+                Promise.all(modules.map(function(m){
+                    return findDependants(m)
+                })).then(function(multi){
+                    Promise.all(multi.map(function(m){
+                        return findDependantsMulti(Object.keys(m))
+                    })).then(resolve)
+                })
+            })
+        }
+
+        var changedModules = changes.map(function(change){
+
+            var load = loadsMap.addrs[change.file],
+                module = load.name
+
+            load.source = change.data
+            return module
+        })
+
+        findDependantsMulti(changedModules).then(function(){
+
+            var depGraph = [],
+                modules = Object.keys(allDependents)
+
+            modules.forEach(function(module){
+                allDependents[module].normalized.forEach(function(dep){
+                    if (loadsMap.modules[dep]){
+                        depGraph.push([dep, module])
+                    }
+                })
+            })
+
+            var nodes = modules.concat(changedModules)
+            var queuedModules = toposort(nodes, depGraph)
+
+            if (queuedModules.indexOf(main) < 0){
+                queuedModules.push(main)
+            }
+
+            if (queuedModules[queuedModules.length - 1] !== main){
+                console.error('main module is not last in import queue', queuedModules)
+            }
+
+            debugLog('queue', queuedModules)
+
+            // Loop through queue imports
+            queuedModules.reduce(function(imp, module) {
+                var load = loadsMap.modules[module]
+                return imp.then(function(){
+                    //console.log('System.define', module)
+                    var deleted = System.delete(module)
+                    return System.define(module, load.source, {address: load.address, metadata: load.metadata})
+                })
+            }, Promise.resolve());
+
+            //console.log('THE END!')
+        })
     }
 
     function initUI(){
@@ -203,18 +361,30 @@
 
         socket.on('files', function (changes) {
             if (connectStatus == 'disconnected') return
+            var sourceChanges = []
             changes.forEach(function(change){
                 var url = options.host + '/' + change.file
                 debugLog('change', url)
                 if (change.file.match(/\.css$/)){
                     replaceCssStyle(url, change.data)
+                } else {
+                    sourceChanges.push(change)
                 }
             })
-
+            if (sourceChanges.length){
+                if (options.hotReload){
+                    reloadHot(sourceChanges)
+                } else {
+                    reloadPage()
+                }
+            }
         });
 
         socket.on('reload', function (data) {
             if (connectStatus == 'disconnected') return
+            //if (options.hotReload){
+            //    reloadHot(data)
+            //} else
             if (options.reload !== false){
                 reloadPage()
             }
