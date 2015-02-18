@@ -2,44 +2,6 @@
 
     var io = wio
 
-    // code is stolen from https://github.com/marcelklehr/toposort/blob/master/index.js
-    var toposort = function(nodes, edges) {
-
-        var cursor = nodes.length
-            , sorted = new Array(cursor)
-            , visited = {}
-            , i = cursor
-
-        while (i--) {
-            if (!visited[i]) visit(nodes[i], i, [])
-        }
-
-        return sorted
-
-        function visit(node, i, predecessors) {
-            if(predecessors.indexOf(node) >= 0) {
-                throw new Error('Cyclic dependency: '+JSON.stringify(node))
-            }
-
-            if (visited[i]) return;
-            visited[i] = true
-
-            // outgoing edges
-            var outgoing = edges.filter(function(edge){
-                return edge[0] === node
-            })
-            if (i = outgoing.length) {
-                var preds = predecessors.concat(node)
-                do {
-                    var child = outgoing[--i][1]
-                    visit(child, nodes.indexOf(child), preds)
-                } while (i)
-            }
-
-            sorted[--cursor] = node
-        }
-    }
-
     var addListener = window.addEventListener ?
         function(obj, evt, cb){ obj.addEventListener(evt, cb, false) } :
         function(obj, evt, cb){ obj.attachEvent('on' + evt, cb) }
@@ -89,22 +51,79 @@
     }
 
 
-    var reloadHot = function(changes){
-        var main = System.main
+    // Topological sort
+    // The code is stolen from https://github.com/marcelklehr/toposort/blob/master/index.js
+    var toposort = function(nodes, edges) {
 
-        // remove non standard elements
-        for (var i = document.body.childNodes.length - 1; i > 0 ; i--){
-            var node = document.body.childNodes[i]
-            //node.nodeName == '#text'
-            if (!/^\w+$/i.test(node.nodeName)){
-                $(node).remove()
-                //document.body.removeChild(node)
+        var cursor = nodes.length
+            , sorted = new Array(cursor)
+            , visited = {}
+            , i = cursor
+
+        while (i--) {
+            if (!visited[i]) visit(nodes[i], i, [])
+        }
+
+        return sorted
+
+        function visit(node, i, predecessors) {
+            if(predecessors.indexOf(node) >= 0) {
+                throw new Error('Cyclic dependency: '+JSON.stringify(node))
             }
+
+            if (visited[i]) return;
+            visited[i] = true
+
+            // outgoing edges
+            var outgoing = edges.filter(function(edge){
+                return edge[0] === node
+            })
+            if (i = outgoing.length) {
+                var preds = predecessors.concat(node)
+                do {
+                    var child = outgoing[--i][1]
+                    visit(child, nodes.indexOf(child), preds)
+                } while (i)
+            }
+
+            sorted[--cursor] = node
+        }
+    }
+
+    var reloadHot = function(changes){
+        var main = System.main,
+            hotReload = options.hotReload || {}
+
+        var removeDOM = function(){
+            debugLog('Removing DOM....')
+            // Remove only non-standard elements by default, including elements with nodeName my-component or #text
+            for (var i = document.body.childNodes.length - 1; i > 0 ; i--){
+                var node = document.body.childNodes[i]
+                if (!/^\w+$/i.test(node.nodeName) || hotReload.removeAllDOM){
+
+                    // use jquery to remove DOM if available
+                    if (typeof $ == 'function' && typeof $.Event == 'function'){
+                        $(node).remove()
+                    } else {
+                        document.body.removeChild(node)
+                    }
+                }
+            }
+        }
+
+        if (hotReload.clearConsole !== false && console.clear){
+            console.clear()
         }
 
         var loadsMap = System.loadsMap
 
         var allDependents = {}
+
+        var compareArrays = function(array1, array2){
+            return (array1.length == array2.length) && array1.every(function(element, index) {
+                return element === array2[index];
+            });
+        }
 
         var findDependants = function(module){
 
@@ -118,21 +137,37 @@
                 }
             }
 
-            // find dependent modules (loads) for changed module
-            return new Promise(function(resolve, reject){
+            // Find dependent modules (loads) for changed module
+            return new Promise(function(resolve){
 
-                Promise.all(Object.keys(loadsMap.modules).map(function(module){
-                    var load = loadsMap.modules[module]
+                Promise.all(Object.keys(loadsMap.modules).map(function(m){
+                    if (m == module){
+                        return Promise.resolve()
+                    }
+
+                    var load = loadsMap.modules[m]
                     var additionalDeps = loadsMap.deps && loadsMap.deps[load.name]
                     if (additionalDeps){
                         load.metadata.deps = load.metadata.deps.concat(additionalDeps)
                     }
-                    return new Promise(function(resolve, reject){
+                    return new Promise(function(resolve){
+                        if (load.normalized instanceof Promise){
+                            return load.normalized.then(resolve)
+                        }
+                        //if (/reading-details\/reading-details/.test(load.name)){
+                        //    console.log('normalize', module, load.prevDeps && load.prevDeps.length, load.metadata.deps.length, load.nomalized && load.nomalized.length, load.prevFailed)
+                        //}
+                        //if (load.prevFailed){
+                        //    return resolve()
+                        //}
+                        if (load.prevDeps && !compareArrays(load.prevDeps, load.metadata.deps) && !load.prevFailed){
+                            load.normalized = false
+                        }
                         if (load.normalized){
                             checkDeps(load)
                             resolve()
                         } else {
-                            Promise.all(load.metadata.deps.map(function(dep){
+                            load.normalized = Promise.all(load.metadata.deps.map(function(dep){
                                 return System.normalize(dep, load.name, load.address)
                             })).then(function(normalized){
                                 load.normalized = normalized
@@ -161,15 +196,21 @@
 
         var changedModules = changes.map(function(change){
 
-            var load = loadsMap.addrs[change.file],
-                module = load.name
+            var load = loadsMap.addrs[change.file]
+
+            if (!load){
+                console.log('No module in loadMaps for changed file', change.file)
+                reloadPage()
+                return
+            }
 
             load.source = change.data
-            return module
-        })
+            return load.name
+        }).filter(function(m){return !!m})
 
         findDependantsMulti(changedModules).then(function(){
 
+            // Create dependency graph and sort it topologically
             var depGraph = [],
                 modules = Object.keys(allDependents)
 
@@ -192,19 +233,58 @@
                 console.error('main module is not last in import queue', queuedModules)
             }
 
+            if (typeof hotReload.removeDOM == 'function'){
+                hotReload.removeDOM()
+            } else if (hotReload.removeDOM !== false){
+                removeDOM()
+                if (typeof hotReload.afterRemoveDOM == 'function'){
+                    hotReload.afterRemoveDOM()
+                }
+            }
+
             debugLog('queue', queuedModules)
 
             // Loop through queue imports
             queuedModules.reduce(function(imp, module) {
-                var load = loadsMap.modules[module]
+
                 return imp.then(function(){
-                    //console.log('System.define', module)
                     var deleted = System.delete(module)
-                    return System.define(module, load.source, {address: load.address, metadata: load.metadata})
+                    if (!deleted){
+                        debugLog('System.delete', module, 'returned false')
+                    }
+
+                    var load = loadsMap.modules[module]
+                    debugLog('System.define/import', module, 'prevFailed', load.prevFailed)
+
+                    // some hacky method to handle error module
+                    if (load.prevFailed){
+                        return new Promise(function(resolve){
+                                //console.log('importing module', module)
+                                System.import(module).then(function(){
+                                    System.delete(module)
+                                    System.import(module).then(function(){
+                                        console.log('SET prevFailed TRUE', module)
+                                        load.prevFailed = false
+                                        resolve()
+                                    })
+                                })
+                        })
+                    }
+
+                    // Every time we define module deps are appended to existing, so clean it up
+                    load.prevDeps = load.metadata.deps
+                    load.metadata.deps = []
+                    return new Promise(function(resolve, reject){
+                        System.define(module, load.source, {address: load.address, metadata: load.metadata})
+                            .then(resolve)
+                            .catch(function(e){
+                                loadsMap.modules[module].prevFailed = true
+                                console.warn('System.define', module, e, loadsMap.modules[module])
+                                reject()
+                            })
+                    })
                 })
             }, Promise.resolve());
-
-            //console.log('THE END!')
         })
     }
 
@@ -364,7 +444,7 @@
             var sourceChanges = []
             changes.forEach(function(change){
                 var url = options.host + '/' + change.file
-                debugLog('change', url)
+                debugLog('change', url, change)
                 if (change.file.match(/\.css$/)){
                     replaceCssStyle(url, change.data)
                 } else {
