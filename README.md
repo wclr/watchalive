@@ -1,6 +1,6 @@
 # Watcahlive!
 
-> Serve, watch, compile sources, receive events, data and do custom actions in browsers.
+> Serve, watch, compile sources, receive events/data and trigger custom actions in browsers.
 
 ## Features
 - Serves development sources and assets using its own HTTP server.
@@ -30,7 +30,7 @@ var wa = new Watchalive({
             less: true,
             custom: {
                 name: 'My custom plugin',
-                patter: '*.custom',
+                pattern: '*.custom',
                 check: function(filePath){
                     return /\.custom$/.test(filePath)
                 },
