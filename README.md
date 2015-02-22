@@ -1,4 +1,4 @@
-# Watcahlive!
+# Watchalive!
 
 > Serve, watch, compile sources, receive events/data and trigger custom actions in browsers.
 
