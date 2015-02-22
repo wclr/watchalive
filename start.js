@@ -25,4 +25,8 @@ function takeParamFromArgs(param){
 
 ;['base', 'port'].forEach(takeParamFromArgs)
 
-require('./lib/start.js')(options)
+var App = require('./lib/app.js')
+
+var app = new App(options)
+
+app.start()
