@@ -79,6 +79,63 @@ You may also install it globally to use from command line
 Grunt/gulp task wrapper (works with locally or globally installed versions)
 > npm install watchalive-runner
 
+
+### Options
+
+#### port
+Type: `Number`
+Default value: `7000`
+
+Port for running Express server and sockets endpoint
+
+#### base
+Type: `String`
+Default value: `process.cwd()`
+
+Base directory (root from where developers assets are served)
+
+#### stdin
+Type: `Boolean`
+Default value: `true`
+
+Enable commands via standard input
+
+#### serve
+Type: `Boolean/Object`
+Default value: `true`
+
+Sets serving rules. If `true` then `default` options are used. If `false` disable files serving.
+
+#### serve.clientLibName
+Type: `String`
+Default value: `watchalive.js`
+
+Name of client script to load via script tag.
+
+#### serve.injectScript
+Type: `Boolean`
+Default value: `true`
+
+Enable automatic injection of client script tag in HTML.
+
+#### serve.injectSocketIo
+Type: `Boolean`
+Default value: `true`
+
+Inject socket.io injection (if you want to use your own soket.io, set to `false`).
+
+#### serve.injectScriptTo
+Type: `String`
+Default value: `head`
+
+Two values are possible: `head` or `body`
+
+#### serve.routes
+Type: `Array`
+
+#### serve.proxies
+Type: `Array`
+
 ## License
 
 MIT
