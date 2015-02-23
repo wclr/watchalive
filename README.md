@@ -25,6 +25,7 @@ var wa = new Watchalive({
     serve: {
         clientLibName: 'watchilve-custom.js',
         injectScript: true,
+        injectScriptTo: 'body',
         injectSocketIo: false
         plugins: {
             less: true,
