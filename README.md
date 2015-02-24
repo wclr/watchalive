@@ -5,7 +5,7 @@
 ## Features
 - Serves development sources and assets using its own HTTP server.
 - Watches file changes and sends the events/date to the client (default action on file change is page reload), using web sockets.
-- Compiles resources and watches the dependencies for changes. Currently supports LESS/CSS compilation out of the box, and can be extended easily via plugins.
+- Compiles (transpiles) resources and watches the dependencies for changes. Can be easily extended via transpile plugins. Currently bundled with LESS/CSS plugin out of the box.
 - Can proxy and route requests or use custom middleware to handle requests.
 - Fully configurable.
 
@@ -27,33 +27,33 @@ var wa = new Watchalive({
         injectScript: true,
         injectScriptTo: 'body',
         injectSocketIo: false
-        plugins: {
+        transpile: {
             less: true,
             custom: {
-                name: 'My custom plugin',
+                name: 'My custom transpiler',
                 pattern: '*.custom',
-                check: function(filePath){
+                match: function(filePath){
                     return /\.custom$/.test(filePath)
                 },
-                parse: function(filePath, callback){
+                transpileFile: function(filePath, callback){
                     //...
                 },
-                parseSource: function(source, cache, callback){
+                transpile: function(source, cache, callback){
                     //...
                 }
             }
         },
-        routes: [
+        route: [
             {'/': '/web/index.html'},
             {'/bootstrap/*': '/bower_components/bootstrap/*'},
             {'/mobile': '/mobile/index.html'},
             {'/dist/:dest': '/:dest/index.dist.html'},
             {path: '^/[\\w\\d-]+(/[\\w\\d-]+)?$', regexp: 'i', target: '/web/index.html'}
         ],
-        proxies: [
+        proxy: [
             {context: '/api', port: 4000}
         ],
-        middlewares: [{function(req, res, next){
+        middleware: [{function(req, res, next){
             //....
         }],
         favicon: true
@@ -62,7 +62,9 @@ var wa = new Watchalive({
         served: true,
         dependencies: false,
         files: [],
-        skip: ['bower_components/*', 'jspm_packages/*', 'node_modules/*']
+        skip: ['bower_components/*', 'jspm_packages/*', 'node_modules/*'],
+        debounce: 200,
+        poolInterval: 200
     },
     clients: {
         badge: false,
@@ -100,8 +102,10 @@ Default value: `true`
 
 Enable commands via standard input
 
+-----
+
 #### serve
-Type: `Boolean/Object`
+Type: `Boolean|Object`
 Default value: `true`
 
 Sets serving rules. If `true` then `default` options are used. If `false` disable files serving.
@@ -130,11 +134,60 @@ Default value: `head`
 
 Two values are possible: `head` or `body`
 
-#### serve.routes
-Type: `Array`
+#### serve.transpile
+Type: `Object`
 
-#### serve.proxies
-Type: `Array`
+See `transpile` instructions.
+
+#### serve.route
+Type: `Array|Object`
+
+See `route` instructions.
+
+#### serve.proxy
+Type: `Array|Object`
+
+See proxy instructions.
+
+-----
+
+### watch.skip
+Type: `Boolean|String|Array`
+Default value: `false`
+
+Minimatch pattern(s) to skip files (pattern will be match with file path relative to base directory)
+
+### watch.files
+Type: `Boolean|String|Array`
+Default value: `false`
+
+Minimatch pattern(s) to add files to watch (pattern will be match with file path relative to base directory)
+
+WARNING: NOT IMPLEMENTED.
+
+### watch.served
+Type: `Boolean`
+Default value: `true`
+
+Watch served files by HTTP server (with respect to `skip` option)
+
+### watch.dependencies
+Type: `Boolean`
+Default value: `true`
+
+Watch the files dependencies of transpiled sources (`skip` option is not considered)
+
+### watch.debounce
+Type: `Number`
+Default value: `100`
+
+Delay before change event is called (helps to prevent multiple change events for many successive file system events)
+
+### watch.poolInterval
+Type: `Number`
+Default value: `200`
+
+Interval to pool file system (`fs.watch` parameter)
 
 ## License
 
