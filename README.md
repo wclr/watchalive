@@ -37,9 +37,6 @@ var wa = new Watchalive({
                 },
                 transpileFile: function(filePath, callback){
                     //...
-                },
-                transpile: function(source, cache, callback){
-                    //...
                 }
             }
         },
@@ -61,7 +58,6 @@ var wa = new Watchalive({
     watch: {
         served: true,
         dependencies: false,
-        files: [],
         skip: ['bower_components/*', 'jspm_packages/*', 'node_modules/*'],
         debounce: 200,
         poolInterval: 200
@@ -73,6 +69,25 @@ var wa = new Watchalive({
 })
 
 wa.start()
+```
+
+You can also use plain config version:
+
+```javascript
+var wa = new Watchalive({
+    port: 7000,
+    base: __dirname,
+    transpile: {
+        less: true
+    },
+    route: [
+        {'/': '/web/index.html'},
+        {'/bootstrap/*': '/bower_components/bootstrap/*'},
+        {'/mobile': '/mobile/index.html'},
+    ],
+    proxy: {context: '/api', port: 4000},
+    skip: ['bower_components/*', 'node_modules/*'],
+})
 ```
 
 You may also install it globally to use from command line
@@ -183,11 +198,13 @@ Default value: `100`
 
 Delay before change event is called (helps to prevent multiple change events for many successive file system events)
 
-### watch.poolInterval
-Type: `Number`
-Default value: `200`
+#### watch.poolInterval, `Number`, `200`
 
 Interval to pool file system (`fs.watch` parameter)
+
+#### clients.sendData, `Boolean`, `true`
+
+Should or not changed files data be sent to client
 
 ## License
 
