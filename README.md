@@ -97,21 +97,21 @@ Grunt/gulp task wrapper (works with locally or globally installed versions)
 > npm install watchalive-runner
 
 
-### Options
+##### Options
 
-#### port
+###### port
 Type: `Number`
 Default value: `7000`
 
 Port for running Express server and sockets endpoint
 
-#### base
+###### base
 Type: `String`
 Default value: `process.cwd()`
 
 Base directory (root from where developers assets are served)
 
-#### stdin
+###### stdin
 Type: `Boolean`
 Default value: `true`
 
@@ -119,60 +119,60 @@ Enable commands via standard input
 
 -----
 
-#### serve
+###### serve
 Type: `Boolean|Object`
 Default value: `true`
 
 Sets serving rules. If `true` then `default` options are used. If `false` disable files serving.
 
-#### serve.clientLibName
+###### serve.clientLibName
 Type: `String`
 Default value: `watchalive.js`
 
 Name of client script to load via script tag.
 
-#### serve.injectScript
+###### serve.injectScript
 Type: `Boolean`
 Default value: `true`
 
 Enable automatic injection of client script tag in HTML.
 
-#### serve.injectSocketIo
+###### serve.injectSocketIo
 Type: `Boolean`
 Default value: `true`
 
 Inject socket.io injection (if you want to use your own soket.io, set to `false`).
 
-#### serve.injectScriptTo
+###### serve.injectScriptTo
 Type: `String`
 Default value: `head`
 
 Two values are possible: `head` or `body`
 
-#### serve.transpile
+###### serve.transpile
 Type: `Object`
 
 See `transpile` instructions.
 
-#### serve.route
+###### serve.route
 Type: `Array|Object`
 
 See `route` instructions.
 
-#### serve.proxy
+###### serve.proxy
 Type: `Array|Object`
 
 See proxy instructions.
 
 -----
 
-### watch.skip
+##### watch.skip
 Type: `Boolean|String|Array`
 Default value: `false`
 
 Minimatch pattern(s) to skip files (pattern will be match with file path relative to base directory)
 
-### watch.files
+##### watch.files
 Type: `Boolean|String|Array`
 Default value: `false`
 
@@ -180,29 +180,29 @@ Minimatch pattern(s) to add files to watch (pattern will be match with file path
 
 WARNING: NOT IMPLEMENTED.
 
-### watch.served
+##### watch.served
 Type: `Boolean`
 Default value: `true`
 
 Watch served files by HTTP server (with respect to `skip` option)
 
-### watch.dependencies
+##### watch.dependencies
 Type: `Boolean`
 Default value: `true`
 
 Watch the files dependencies of transpiled sources (`skip` option is not considered)
 
-### watch.debounce
+##### watch.debounce
 Type: `Number`
 Default value: `100`
 
 Delay before change event is called (helps to prevent multiple change events for many successive file system events)
 
-#### watch.poolInterval, `Number`, `200`
+####### watch.poolInterval, `Number`, `200`
 
 Interval to pool file system (`fs.watch` parameter)
 
-#### clients.sendData, `Boolean`, `true`
+####### clients.sendData, `Boolean`, `true`
 
 Should or not changed files data be sent to client
 
