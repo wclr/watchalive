@@ -13,9 +13,11 @@
 
 > npm install watchalive
 
-#### Server side usage:
+### Server side usage:
 
 ```javascript
+var Watchalive = require('watchalive')
+
 var wa = new Watchalive({
     port: 7001,
     base: __dirname,
@@ -38,17 +40,43 @@ After this watchalive is available http://localhost:7000
 
 This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
 
-#### Client side usage:
 
-By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page.
 
-You can configure it client side wacthilive like:
+#### Command line usage
+
+You may also install it globally to use from command line
+> npm install watchalive -g
+
+Usage:
+> watchalive [options]
+
+> watchalive --port 8000 --base /front-app
+
+> watchalive --config myconfig.json
+
+> watchalive myconfig.json
+
+By default looks up 'watchalive.json' in working directory to use as config file.
+
+#### Grunt/gulp task wrapper
+> npm install watchalive-runner
+
+Just pass your config as options to watchalive grunt/gulp task.
+In grunt/gulp task there is available option `useGlobal` (`boolean, false`) tells if to use locally installed watchalive version or global one.
+By default the tasks looks up for local watchalive package and falls back to global.
+
+
+### Client side usage:
+
+By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page at load time.
+
+You can configure it like:
 
 ```HTML
 <script>
 
     watchalive.config({
-        host: myserver.local:701, // custom host if watchalive server is not on the same domain
+        host: 'myserver.local:701', // custom host if watchalive server is not on the same domain
         reload: true, // make page reload on any file changes received,
         console: ['error'] // intercept console `error` calls and sends it to the server
     })
@@ -67,29 +95,6 @@ You can configure it client side wacthilive like:
 </script>
 ```
 
-
-## Command line usage
-
-You may also install it globally to use from command line
-> npm install watchalive -g
-
-Usage:
-> watchalive [options]
-
-> watchalive --port 8000 --base /front-app
-
-> watchalive --config myconfig.json
-
-> watchalive myconfig.json
-
-By default looks up 'watchalive.json' in working directory to use as config file.
-
-## Grunt/gulp task wrapper
-> npm install watchalive-runner
-
-Just pass your config as options to watchalive grunt/gulp task.
-In grunt/gulp task there is available option `useGlobal` (`boolean, false`) tells if to use locally installed watchalive version or global one.
-By default the tasks looks up for local watchalive package and falls back to global.
 
 ## Default config
 The default config gives you a <b>quick look</b> on all options and default values that will be merged with your config values.
