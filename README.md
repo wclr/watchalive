@@ -13,69 +13,11 @@
 
 > npm install watchalive
 
-Example of usage:
-
-```javascript
-var Watchalive = require('watchalive')
-
-var wa = new Watchalive({
-    port: 7000,
-    base: __dirname,
-    stdin: true,
-    serve: {
-        clientLibName: 'watchilve-custom.js',
-        injectScript: true,
-        injectScriptTo: 'body',
-        injectSocketIo: false
-        transpile: {
-            less: true,
-            custom: {
-                name: 'My custom transpiler',
-                pattern: '*.custom',
-                match: function(filePath){
-                    return /\.custom$/.test(filePath)
-                },
-                transpileFile: function(filePath, callback){
-                    //...
-                }
-            }
-        },
-        route: [
-            {'/': '/web/index.html'},
-            {'/bootstrap/*': '/bower_components/bootstrap/*'},
-            {'/mobile': '/mobile/index.html'},
-            {'/dist/:dest': '/:dest/index.dist.html'},
-            {path: '^/[\\w\\d-]+(/[\\w\\d-]+)?$', regexp: 'i', target: '/web/index.html'}
-        ],
-        proxy: [
-            {context: '/api', port: 4000}
-        ],
-        middleware: [{function(req, res, next){
-            //....
-        }],
-        favicon: true
-    },
-    watch: {
-        served: true,
-        dependencies: false,
-        skip: ['bower_components/*', 'jspm_packages/*', 'node_modules/*'],
-        debounce: 200,
-        poolInterval: 200
-    },
-    clients: {
-        badge: false,
-        sendData: false
-    }
-})
-
-wa.start()
-```
-
-You can also use plain config version (some options may overlap, so use consciously):
+Usage is simple:
 
 ```javascript
 var wa = new Watchalive({
-    port: 7000,
+    port: 7001,
     base: __dirname,
     transpile: {
         less: true
@@ -86,18 +28,76 @@ var wa = new Watchalive({
         {'/mobile': '/mobile/index.html'},
     ],
     proxy: {context: '/api', port: 4000},
-    skip: ['bower_components/*', 'node_modules/*'],
+    skip: ['bower_components/*', 'node_modules/*', '**/favicon.png'],
 })
+
+wa.start()
 ```
+
+This is a flat version of config (some options may overlap, use consciously). You can give more structure to your config (see `Default config`).
+
+
+## Command line Usage
 
 You may also install it globally to use from command line
 > npm install watchalive -g
 
-Grunt/gulp task wrapper (works with locally or globally installed versions)
+Usage:
+> watchalive [options]
+> watchalive --port 8000 --base /front-app
+> watchalive --config myconfig.json
+> watchalive myconfig.json
+
+By default looks up 'watchalive.json' in working directory as config file.
+
+## Grunt/gulp task wrapper
 > npm install watchalive-runner
 
+Just pass your config as options to watchalive grunt/gulp task.
+In grunt/gulp task there is available option `useGlobal` (`boolean, false`) tells if to use locally installed watchalive version or global one.
+By default the tasks looks up for local watchalive package and falls back to global.
 
-##### Options
+## Default config
+The default config gives you a <b>quick look</b> on all options and default values that will be merged with your config values.
+
+```javascript
+var defaultConfig = {
+        port: 7000, // port to serve files and handle socket connection
+        base: process.cwd(),
+        stdin: true, // enable basic managment via stdin commands
+        debug: false, // output debug messages
+
+        serve: {
+            clientLibName: 'watchalive.js',
+            injectScript: true,
+            injectSocketIo: true,
+            injectScriptTo: 'head',
+            transpile: {},
+            route:[],
+            proxy: [],
+            middleware: [],
+            favicon: 'favicon.png',
+            http2: false,
+            httpOptions: false
+        },
+        watch: {
+            dependencies: true,
+            files: [],
+            skip: [],
+            served: true,
+            poolInterval: 200
+
+        },
+        clients: {
+            badge: true,
+            allowMessages: true,
+            sendData: true
+        }
+    }
+```
+
+
+## Options
 
 ###### port
 Type: `Number`
@@ -116,6 +116,11 @@ Type: `Boolean`
 Default value: `true`
 
 Enable commands via standard input
+
+###### debug
+type: `boolean`, default: `false`
+
+Enable output of debug messages.
 
 -----
 
