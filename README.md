@@ -68,6 +68,8 @@ By default the tasks looks up for local watchalive package and falls back to glo
 
 ### Client side usage:
 
+Watchalive client is not intended to do some client work (except page reload if needed), but rather to allow you handle server events and data, and do any custom actions you need.
+
 By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page at load time.
 
 You can configure it like:
@@ -76,20 +78,31 @@ You can configure it like:
 <script>
 
     watchalive.config({
-        host: 'myserver.local:701', // custom host if watchalive server is not on the same domain
+        host: 'http://myserver.local:7001', // custom host if watchalive server is not on the same domain
         reload: true, // make page reload on any file changes received,
         console: ['error'] // intercept console `error` calls and sends it to the server
     })
 
     // you can manually handle file change data received from server
     watchalive.onFiles(function(changes){
-         changes.forEach(function(file){
+        changes.forEach(function(file){
             if (/\.css$/.test(file)){
-                // hot CSS style replacement
+                // simple css link hot reload
+                var sheets = document.getElementsByTagName("link");
+                for (var i = 0; i < sheets.length; ++i) {
+                    var elem = sheets[i];
+                    var rel = elem.rel;
+                    if (elem.href && rel == "stylesheet") {
+                        var url = elem.href.replace(/\?\d+/, '');
+                        if (url.lastIndexOf(file) + file.length == url.length){
+                            elem.href = url + '?' + (new Date().valueOf());
+                        }
+                    }
+                }
             } else {
                 window.location.reload()
             }
-         })
+        })
     })
 
 </script>
@@ -100,22 +113,22 @@ You can configure it like:
 The default config gives you a <b>quick look</b> on all options and default values that will be merged with your config values.
 
 ```javascript
-var defaultConfig = {
+    var defaultConfig = {
         port: 7000, // port to serve files and handle socket connection
-        base: process.cwd(),
+        base: process.cwd(), // base from where files are served and resolved
         stdin: true, // enable basic management via stdin commands
         debug: false, // output debug messages
 
         serve: {
             clientLibName: 'watchalive.js',
             injectScript: true, // inject client script in HTML automatically
-            injectSocketIo: true, // (NOT IMPLEMENTED, always injected)
+            injectSocketIo: true, // if false won't load socket.io
             injectScriptTo: 'head', // where to inject script `head` or `body`
             transpile: {}, // enabled embedded and custom transpilers
-            route:[], // routes
-            proxy: [], // proxies
-            middleware: [], // middlewares for express server (NOT IMPLEMENTED)
-            favicon: 'favicon.png',
+            route:[], // additional flexible config for routes
+            proxy: [], // proxy requests config (for example to API server)
+            middleware: [], // middlewares for  express.js server (NOT IMPLEMENTED)
+            favicon: 'favicon.png', // use standard express.js middleware to serve favicon
             http2: false, // enables HTTP2 server
             httpOptions: false // options to pass to HTTP server
         },
@@ -130,7 +143,7 @@ var defaultConfig = {
         clients: {
             badge: true, // show badge on client (NOT IMPLEMENTED, badge always shown)
             allowMessages: true, // show custom message (NOT IMPLEMENTED)
-            sendData: true // send changed files data to client
+            sendData: false // send changed files data to client
         }
     }
 ```
@@ -258,9 +271,9 @@ Delay before change event is called (helps to prevent multiple change events for
 
 Interval to pool file system (`fs.watch` parameter)
 
-###### clients.sendData, `Boolean`, `true`
+###### clients.sendData, `Boolean`, `false`
 
-Should or not changed files data be sent to client
+Should or not changed files data be sent to client, if enabled file changes then are sent as array of `{file: ..., data: ...}`
 
 ## License
 
