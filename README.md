@@ -71,7 +71,7 @@ var wa = new Watchalive({
 wa.start()
 ```
 
-You can also use plain config version:
+You can also use plain config version (some options may overlap, so use consciously):
 
 ```javascript
 var wa = new Watchalive({
@@ -164,13 +164,23 @@ Type: `Array|Object`
 
 See proxy instructions.
 
+###### serve.httpOptions
+type: `boolean|object`, default: `false`
+
+Custom HTTP/HTTP2 server options.
+
+###### serve.http2
+Type: `boolean`, default: `false`
+
+Enables HTTP2 server! For convenience if `key` and `cert` are not passed in `httpOptions` sample self generated certificates are used.
+
+
 -----
 
 ##### watch.skip
-Type: `Boolean|String|Array`
-Default value: `false`
+type: `boolean|string|array`, default: `false`
 
-Minimatch pattern(s) to skip files (pattern will be match with file path relative to base directory)
+Minimatch pattern(s) to skip files. Pattern(s) will be match with file path relative to base directory (for example if you want to skip `favicon.png` from all paths use `**/favicon.png` pattern)
 
 ##### watch.files
 Type: `Boolean|String|Array`
@@ -198,11 +208,11 @@ Default value: `100`
 
 Delay before change event is called (helps to prevent multiple change events for many successive file system events)
 
-####### watch.poolInterval, `Number`, `200`
+###### watch.poolInterval, `Number`, `200`
 
 Interval to pool file system (`fs.watch` parameter)
 
-####### clients.sendData, `Boolean`, `true`
+###### clients.sendData, `Boolean`, `true`
 
 Should or not changed files data be sent to client
 
