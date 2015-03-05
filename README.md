@@ -67,34 +67,34 @@ The default config gives you a <b>quick look</b> on all options and default valu
 var defaultConfig = {
         port: 7000, // port to serve files and handle socket connection
         base: process.cwd(),
-        stdin: true, // enable basic managment via stdin commands
+        stdin: true, // enable basic management via stdin commands
         debug: false, // output debug messages
 
         serve: {
             clientLibName: 'watchalive.js',
-            injectScript: true,
-            injectSocketIo: true,
-            injectScriptTo: 'head',
-            transpile: {},
-            route:[],
-            proxy: [],
-            middleware: [],
+            injectScript: true, // inject client script in HTML automatically
+            injectSocketIo: true, // (NOT IMPLEMENTED, always injected)
+            injectScriptTo: 'head', // where to inject script `head` or `body`
+            transpile: {}, // enabled embedded and custom transpilers
+            route:[], // routes
+            proxy: [], // proxies
+            middleware: [], // middlewares for express server (NOT IMPLEMENTED)
             favicon: 'favicon.png',
-            http2: false,
-            httpOptions: false
+            http2: false, // enables HTTP2 server
+            httpOptions: false // options to pass to HTTP server
         },
         watch: {
-            dependencies: true,
-            files: [],
-            skip: [],
-            served: true,
-            poolInterval: 200
-
+            dependencies: true, // watch for dependencies (of transpiled files)
+            files: [], // additionally watch for matched files (NOT IMPLEMENTED)
+            skip: [], // skip some files
+            served: true, // watch for files served by HTTP server
+            poolInterval: 200, // interval for pooling
+            debounce: 100 // delay to handle multiple
         },
         clients: {
-            badge: true,
-            allowMessages: true,
-            sendData: true
+            badge: true, // show badge on client (NOT IMPLEMENTED, badge always shown)
+            allowMessages: true, // show custom message (NOT IMPLEMENTED)
+            sendData: true // send changed files data to client
         }
     }
 ```
