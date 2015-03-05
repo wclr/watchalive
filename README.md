@@ -9,14 +9,15 @@
 - Can proxy and route requests or use custom middleware to handle requests.
 - Fully configurable.
 
-## Advantage
+## Advantages
 
 Advantages over other solutions like `livereload`, `live-server`, `browser-sync`, etc:
 
 - Only served files are watched.
 - Caches watched/served files, so loading time of dev page is faster.
-- Flexible custom routes and proxies support.
-- Simple transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in tranparent manner without need to have compiled version on the drive.
+- Flexible custom routes and proxies configuration support.
+- Simple transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in transparent manner without need to have compiled version on the drive.
+- Watch dependencies of transpiled files for changed, recompiles and notice (or even send source data) to client.
 - It notifies client side about particular changes (by default send list of changed files urls).
 - It can send sources of changed files.
 - You can do with this what ever you want, reload page, do live refresh of css styles, or hot replacement of JS modules, rerun test, whatever.
@@ -30,6 +31,7 @@ Advantages over other solutions like `livereload`, `live-server`, `browser-sync`
 - Bugs are possible.
 
 You can ask questions on Gitter:
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/whitecolor/watchalive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Installation and usage
