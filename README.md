@@ -70,7 +70,7 @@ By default the tasks looks up for local watchalive package and falls back to glo
 
 Watchalive client is not intended to do some client work (except page reload if needed), but rather to allow you handle server events and data, and do any custom actions you need.
 
-By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page at load time.
+By default client watchalive script is injected first in the head, that will make available global `watchalive` object in the page at load time.
 
 You can configure it like:
 
@@ -142,6 +142,8 @@ The default config gives you a <b>quick look</b> on all options and default valu
         },
         clients: {
             badge: true, // show badge on client (NOT IMPLEMENTED, badge always shown)
+            reload: false, // if clients should be reloaded on change events
+            console: false, // should console be intercepted on clients
             allowMessages: true, // show custom message (NOT IMPLEMENTED)
             sendData: false // send changed files data to client
         }
@@ -274,6 +276,61 @@ Interval to pool file system (`fs.watch` parameter)
 ###### clients.sendData, `Boolean`, `false`
 
 Should or not changed files data be sent to client, if enabled file changes then are sent as array of `{file: ..., data: ...}`
+
+
+### Routes
+
+`serve.route` can be array of object `{path: ..., target: ...}, or simpleer: `{'path/url': 'target/url/file'}`
+
+```javascript
+route: [
+    // simple map
+    {'/': '/web/index.html'}, //when client requests `/` it recievs /web/index.html
+    {path: '/mobile', target: '/mobile/index.html'}, // when client requests `/mobiled` it recievs /web/index.html
+
+    // wildcard (only single supported)
+    /mypackage/*': '/bower_components/mypackage/*'}, // everyting after mypackage/ will be mapped
+
+    // parameters
+    {'/dist/:dest': '/:dest/index.dist.html'} // /dist/foo will be mapped to /foo/index.dist.html
+
+    // regexp support in path*
+    {path: '^/[\\w\\d-]+(/[\\w\\d-]+)?$', regexp: 'i', target: '/web/index.html'}
+]
+```
+
+When `path` value is of `string` type tend to be used to construct RegExp, you should provide `regexp` property with RegExp options, if no options you should provide empty string `regexp: ''`
+
+### Proxies
+
+`serve.proxy` can be array of object `{context: ...,  target: ...}`
+
+`context` defines which request to watchalive server should be proxied
+
+`target` is full host string value including protocol and port, it can be replaced with number of options including `port`, `protocol` and `host`
+
+```javascript
+proxy: [
+    {context: '/api', port: 4000},
+    {context: '/other-api', target: 'http://otherhost/api:9000'},
+]
+```
+### Transpilers
+
+You can add you custom transpilers like:
+
+```javascript
+transpilers: {
+    sass: {
+        pattern: '*.scss',
+        transpileFile: function(filePath, callback){
+            // read file at filePath
+            // parse it
+            // call callback(err, data)
+        }
+    }
+}
+```
 
 ## License
 
