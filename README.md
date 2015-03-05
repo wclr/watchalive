@@ -34,6 +34,10 @@ var wa = new Watchalive({
 wa.start()
 ```
 
+After this watchalive is available http://localhost:7000
+
+This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
+
 #### Client side usage:
 
 By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page.
@@ -44,6 +48,7 @@ You can configure it client side wacthilive like:
 <script>
 
     watchalive.config({
+        host: myserver.local:701, // custom host if watchalive server is not on the same domain
         reload: true, // make page reload on any file changes received,
         console: ['error'] // intercept console `error` calls and sends it to the server
     })
@@ -61,8 +66,6 @@ You can configure it client side wacthilive like:
 
 </script>
 ```
-
-This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
 
 
 ## Command line usage
