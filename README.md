@@ -13,7 +13,7 @@
 
 > npm install watchalive
 
-Usage is simple:
+#### Server side usage:
 
 ```javascript
 var wa = new Watchalive({
@@ -32,6 +32,34 @@ var wa = new Watchalive({
 })
 
 wa.start()
+```
+
+#### Client side usage:
+
+By default client watchalive script is inject first in the head, that will make available global `watchalive` object in the page.
+
+You can configure it client side wacthilive like:
+
+```HTML
+<script>
+
+    watchalive.config({
+        reload: true, // make page reload on any file changes received,
+        console: ['error'] // intercept console `error` calls and sends it to the server
+    })
+
+    // you can manually handle file change data received from server
+    watchalive.onFiles(function(changes){
+         changes.forEach(function(file){
+            if (/\.css$/.test(file)){
+                // hot CSS style replacement
+            } else {
+                window.location.reload()
+            }
+         })
+    })
+
+</script>
 ```
 
 This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
@@ -112,7 +140,7 @@ Port for running Express server and sockets endpoint
 Type: `String`
 Default value: `process.cwd()`
 
-Base directory (root from where developers assets are served)
+Base directory (root from where developers assets are served), this is also base directory for other relative paths in config.
 
 ###### stdin
 Type: `Boolean`
