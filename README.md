@@ -9,7 +9,7 @@
 - Can proxy and route requests or use custom middleware to handle requests.
 - Fully configurable.
 
-## Installation
+## Installation and usage
 
 > npm install watchalive
 
@@ -34,21 +34,24 @@ var wa = new Watchalive({
 wa.start()
 ```
 
-This is a flat version of config (some options may overlap, use consciously). You can give more structure to your config (see `Default config`).
+This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
 
 
-## Command line Usage
+## Command line usage
 
 You may also install it globally to use from command line
 > npm install watchalive -g
 
 Usage:
 > watchalive [options]
+
 > watchalive --port 8000 --base /front-app
+
 > watchalive --config myconfig.json
+
 > watchalive myconfig.json
 
-By default looks up 'watchalive.json' in working directory as config file.
+By default looks up 'watchalive.json' in working directory to use as config file.
 
 ## Grunt/gulp task wrapper
 > npm install watchalive-runner
@@ -146,7 +149,9 @@ Enable automatic injection of client script tag in HTML.
 Type: `Boolean`
 Default value: `true`
 
-Inject socket.io injection (if you want to use your own soket.io, set to `false`).
+Inject socket.io injection (if you want to use your own socket.io, set to `false`).
+
+WARNING: NOT IMPLEMENTED. Always injected.
 
 ###### serve.injectScriptTo
 Type: `String`
