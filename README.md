@@ -9,6 +9,11 @@
 - Can proxy and route requests or use custom middleware to handle requests.
 - Fully configurable.
 
+## State
+
+It is in active development currently.
+You can ask question on Gitter: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/whitecolor/watchalive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 ## Installation and usage
 
 > npm install watchalive
@@ -291,10 +296,10 @@ route: [
     // wildcard (only single supported)
     /mypackage/*': '/bower_components/mypackage/*'}, // everyting after mypackage/ will be mapped
 
-    // parameters
+    // parameters like :param
     {'/dist/:dest': '/:dest/index.dist.html'} // /dist/foo will be mapped to /foo/index.dist.html
 
-    // regexp support in path*
+    // regexp support in path
     {path: '^/[\\w\\d-]+(/[\\w\\d-]+)?$', regexp: 'i', target: '/web/index.html'}
 ]
 ```
@@ -317,20 +322,31 @@ proxy: [
 ```
 ### Transpilers
 
-You can add you custom transpilers like:
+
+Currently only LESS/CSS transpiler is included out of the box. When you request *.less file it will be converted to css and sent as CSS data.
+
+You can easily add you custom transpilers like:
 
 ```javascript
 transpilers: {
     sass: {
         pattern: '*.scss',
-        transpileFile: function(filePath, callback){
+        transpileFile: function(filePath, cache, callback){
             // read file at filePath
             // parse it
-            // call callback(err, data)
+            // cache contains all files data currently watched
+            // call callback(err, data, deps)
+            // deps is optional array of file dependencies (full paths)
+        },
+        // or (NOT IMPLEMENTED yet)
+        transpile: function(source, cache, callback){
+
         }
     }
 }
 ```
+
+
 
 ## License
 
