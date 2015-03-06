@@ -1,1 +1,1 @@
-module.exports = require('./lib/start')
+module.exports = require('./lib/app')

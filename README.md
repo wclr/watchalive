@@ -13,24 +13,19 @@
 
 Advantages over other solutions like `livereload`, `live-server`, `browser-sync`, etc:
 
-- Only served files are watched.
-- Caches watched/served files, so loading time of dev page is faster.
-- Flexible custom routes and proxies configuration support.
+- Watches only files served to client(s).
+- Caches watched files, so loading time of client page is faster.
 - Simple transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in transparent manner without need to have compiled version on the drive.
-- Watch dependencies of transpiled files for changed, recompiles and notice (or even send source data) to client.
 - It notifies client side about particular changes (by default send list of changed files urls).
 - It can send sources of changed files.
+- Watch dependencies of transpiled files for changed.
 - You can do with this what ever you want, reload page, do live refresh of css styles, or hot replacement of JS modules, rerun test, whatever.
-- You can even implement what `browser-sync` does by using custom events that connected clients can send to each other (NOT IMPLEMENTED yet, can be easily added).
+- Flexible custom routes and proxies configuration support.
 
 ## Current State
 
-- It is currently in active development and use.
-- API is not stable (but very simple, thus unlikely to change much)
-- Docs are not very tidy.
-- Bugs are possible.
-
-You can ask questions on Gitter:
+- It is currently in quite active development and use.
+- You can even ask questions on Gitter chanel:
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/whitecolor/watchalive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -55,7 +50,9 @@ var wa = new Watchalive({
         {'/mobile': '/mobile/index.html'},
     ],
     proxy: {context: '/api', port: 4000},
-    skip: ['bower_components/*', 'node_modules/*', '**/favicon.png'],
+    skip: ['bower_components/*', 'node_modules/*', '**/favicon.ico'],
+    console: true, // will send console outputs to server
+    reload: true // will make client page reload on any file changes
 })
 
 wa.start()
@@ -306,29 +303,30 @@ Should or not changed files data be sent to client, if enabled file changes then
 ### Routes
 
 `serve.route` can be array of object `{path: ..., target: ...}, or simpleer: `{'path/url': 'target/url/file'}`
+It is useful for development of sites that use Pushstate.
 
 ```javascript
 route: [
-    // simple map
-    {'/': '/web/index.html'}, //when client requests `/` it recievs /web/index.html
-    {path: '/mobile', target: '/mobile/index.html'}, // when client requests `/mobiled` it recievs /web/index.html
+    // simple map - when client requests `/` it recievs /web/index.html
+    {'/': '/web/index.html'},
+    // when client requests `/mobiled` it recievs /web/index.html
+    {path: '/mobile', target: '/mobile/index.html'},
 
-    // wildcard (only single supported)
-    /mypackage/*': '/bower_components/mypackage/*'}, // everyting after mypackage/ will be mapped
+    // wildcard (only single supported) - everyting after mypackage/ will be mapped
+    /mypackage/*': '/bower_components/mypackage/*'},
 
-    // parameters like :param
-    {'/dist/:dest': '/:dest/index.dist.html'} // /dist/foo will be mapped to /foo/index.dist.html
+    // parameters - /dist/foo will be mapped to /foo/index.dist.html
+    {'/dist/:dest': '/:dest/index.dist.html'}
 
-    // regexp support in path
+    // regexp path - when path is tring, regexp parameter should present even as empty string `regexp: ''`
     {path: '^/[\\w\\d-]+(/[\\w\\d-]+)?$', regexp: 'i', target: '/web/index.html'}
 ]
 ```
 
-When `path` value is of `string` type tend to be used to construct RegExp, you should provide `regexp` property with RegExp options, if no options you should provide empty string `regexp: ''`
-
 ### Proxies
 
 `serve.proxy` can be array of object `{context: ...,  target: ...}`
+Needed for exampley when you you want to proxy you requests to you API server.
 
 `context` defines which request to watchalive server should be proxied
 
