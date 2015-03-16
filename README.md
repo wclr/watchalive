@@ -2,6 +2,11 @@
 
 > Serve, watch, compile sources, receive events/data and trigger custom actions in browsers.
 
+
+## Caution (current state)
+
+This project is not intended to be used as open source. DO NOT try to use it.
+
 ## Features
 - Serves development sources and assets using its own HTTP server.
 - Watches file changes and sends the events/date to the client (default action on file change is page reload), using web sockets.
@@ -21,13 +26,6 @@ Advantages over other solutions like `livereload`, `live-server`, `browser-sync`
 - Watch dependencies of transpiled files for changed.
 - You can do with this what ever you want, reload page, do live refresh of css styles, or hot replacement of JS modules, rerun test, whatever.
 - Flexible custom routes and proxies configuration support.
-
-## Current State
-
-- It is currently in quite active development and use.
-- You can even ask questions on Gitter chanel:
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/whitecolor/watchalive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Installation and usage
 
