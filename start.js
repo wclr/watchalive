@@ -12,8 +12,8 @@ var options = {}
 if (fs.existsSync(configFileName)){
     try {
         console.log('Reading configuration file', configFileName)
-        var fileConfig = JSON.parse(fs.readFileSync(configFileName))
-        options = fileConfig
+        options = JSON.parse(fs.readFileSync(configFileName))
+        options.port = process.env.PORT || options.port // minihost sets it's own port
     } catch(e){
         console.log('Could parse watchalive configuration file', e)
     }
