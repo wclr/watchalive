@@ -330,6 +330,8 @@ Needed for exampley when you you want to proxy you requests to you API server.
 
 `target` is full host string value including protocol and port, it can be replaced with number of options including `port`, `protocol` and `host`
 
+`changeOrigin` - default true
+
 ```javascript
 proxy: [
     {context: '/api', port: 4000},
