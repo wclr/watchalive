@@ -19,6 +19,19 @@ if (fs.existsSync(configFileName)){
     }
 }
 
+//if (!!global.gc) {
+//    console.log('Garbage collector is available on global scope')
+//    setInterval(function() {
+//        try {
+//            global.gc()
+//        } catch (gcerr) {
+//            console.log('Garbage collecting error', gcerr)
+//        }
+//    }, 1000 * 30)
+//} else {
+//    console.log('--expose-gc flag wasn\'t provided')
+//}
+
 function takeParamFromArgs(param){
     options[param] = argv[param] || argv[param[0]] || options[param]
 }
