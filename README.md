@@ -2,12 +2,8 @@
 
 > Serve, watch, compile sources, receive events/data and trigger custom actions in browsers.
 
-
-## Caution (current state)
-
-This project is not intended to be used as open source. DO NOT try to use it.
-
 ## Features
+
 - Serves development sources and assets using its own HTTP server.
 - Watches file changes and sends the events/date to the client (default action on file change is page reload), using web sockets.
 - Compiles (transpiles) resources and watches the dependencies for changes. Can be easily extended via transpile plugins. Currently bundled with LESS/CSS plugin out of the box.
@@ -18,14 +14,14 @@ This project is not intended to be used as open source. DO NOT try to use it.
 
 Advantages over other solutions like `livereload`, `live-server`, `browser-sync`, etc:
 
-- Watches only files served to client(s).
+- Watches only files served to clients.
 - Caches watched files, so loading time of client page is faster.
-- Simple transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in transparent manner without need to have compiled version on the drive.
-- It notifies client side about particular changes (by default send list of changed files urls).
-- It can send sources of changed files.
-- Watch dependencies of transpiled files for changed.
-- You can do with this what ever you want, reload page, do live refresh of css styles, or hot replacement of JS modules, rerun test, whatever.
-- Flexible custom routes and proxies configuration support.
+- Simple and flexible transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in transparent manner without need to have compiled version on the drive (or compile it on the client runtime which is often slower then do it on dev server).
+- Notifies client side about particular changes (by default send list of changed files urls).
+- Can send source (compiled/transpiled) date of changed files.
+- Watches aslo dependencies of transpiled sources (like `@import` deslarations) for changes.
+- You are free to do what ever you want with change events data: reload page, do live refresh of css styles, or hot replacement of JS modules, run test, whatever.
+- Supports flexible routes and proxies configuration.
 
 ## Installation and usage
 
@@ -37,19 +33,13 @@ Advantages over other solutions like `livereload`, `live-server`, `browser-sync`
 var Watchalive = require('watchalive')
 
 var wa = new Watchalive({
-    port: 7001,
-    base: __dirname,
-    transpile: {
-        less: true
-    },
-    route: [
-        {'/': '/web/index.html'},
-        {'/bootstrap/*': '/bower_components/bootstrap/*'},
-        {'/mobile': '/mobile/index.html'},
-    ],
-    proxy: {context: '/api', port: 4000},
+    port: 7001, // will start on this port
+    base: __dirname, // will serve this direcotry
+    transpile: {less: true}, // will transpile less souces
+    route: '/index.html', // will route any not found address to  /index.html
+    proxy: {context: '/api', port: 4000}, // will proxy all requests to /api/* to 4000 port
     skip: ['bower_components/*', 'node_modules/*', '**/favicon.ico'],
-    console: true, // will send console outputs to server
+    console: true, // will send console outputs to server - useful for debuging some clients
     reload: true // will make client page reload on any file changes
 })
 
@@ -130,7 +120,7 @@ You can configure it like:
 
 
 ## Default config
-The default config gives you a <b>quick look</b> on all options and default values that will be merged with your config values.
+The default config gives you a <b>quick look</b> on all options and default values that will be overrided by supplied config values.
 
 ```javascript
     var defaultConfig = {
