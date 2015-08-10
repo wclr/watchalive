@@ -2,44 +2,45 @@
 
 var fs = require('fs'),
     path = require('path'),
-    cwd = process.cwd(),
     argv = require('yargs').argv;
 
-var configFileName = path.resolve(cwd, argv.config || argv._[0] || 'watchalive.json')
+var configPaths = [
+    path.resolve(argv.config || argv._[0] || 'watchalive.json'),
+    path.resolve('watchalive.js'),
+    path.resolve('package.json')
+]
 
-var options = {}
+var getConfig = function(configPath){
 
-if (fs.existsSync(configFileName)){
     try {
-        console.log('Reading configuration file', configFileName)
-        var fileConfig = JSON.parse(fs.readFileSync(configFileName))
-        options = fileConfig
+        console.log('Reading configuration file', configPath)
+        var config = require(configPath)
+        return /package\.json/.test(configPath) ? config.watchalive : config
     } catch(e){
-        console.log('Could parse watchalive configuration file', e)
+        console.log('Could not parse watchalive configuration file', e)
     }
 }
 
-//if (!!global.gc) {
-//    console.log('Garbage collector is available on global scope')
-//    setInterval(function() {
-//        try {
-//            global.gc()
-//        } catch (gcerr) {
-//            console.log('Garbage collecting error', gcerr)
-//        }
-//    }, 1000 * 30)
-//} else {
-//    console.log('--expose-gc flag wasn\'t provided')
-//}
 
-function takeParamFromArgs(param){
-    options[param] = argv[param] || argv[param[0]] || options[param]
+var config
+
+configPaths.every(function(configPath){
+    if (fs.existsSync(configPath)){
+        config = getConfig(configPath)
+    }
+    return !config
+})
+
+config = config || {}
+
+for (var arg in argv){
+    if (arg !== '_'){
+        config[arg] = argv[arg]
+    }
 }
-
-;['base', 'port'].forEach(takeParamFromArgs)
 
 var App = require('./lib/app.js')
 
-var app = new App(options)
+var app = new App(config)
 
 app.start()

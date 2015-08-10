@@ -35,7 +35,7 @@ var Watchalive = require('watchalive')
 var wa = new Watchalive({
     port: 7001, // will start on this port
     base: __dirname, // will serve this direcotry
-    transpile: {less: true}, // will transpile less souces
+    plugin: ["less"], // will attach watchalive-less plugin to transpile LESS/CSS
     route: '/index.html', // will route any not found address to  /index.html
     proxy: {context: '/api', port: 4000}, // will proxy all requests to /api/* to 4000 port
     skip: ['bower_components/*', 'node_modules/*', '**/favicon.ico'],
@@ -328,27 +328,20 @@ proxy: [
     {context: '/other-api', target: 'http://otherhost/api:9000'},
 ]
 ```
-### Transpilers
-
-
-Currently only LESS/CSS transpiler is included out of the box. When you request *.less file it will be converted to css and sent as CSS data.
+### Transpilers && Plugins
 
 You can easily add you custom transpilers like:
 
 ```javascript
 transpilers: {
     sass: {
-        pattern: '*.scss',
+        match: '*.scss',
         transpileFile: function(filePath, cache, callback){
             // read file at filePath
             // parse it
             // cache contains all files data currently watched
             // call callback(err, data, deps)
             // deps is optional array of file dependencies (full paths)
-        },
-        // or (NOT IMPLEMENTED yet)
-        transpile: function(source, cache, callback){
-
         }
     }
 }
