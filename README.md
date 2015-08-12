@@ -347,6 +347,10 @@ transpilers: {
 }
 ```
 
+### Test?
+
+Nay. It just works.
+
 ## License
 
 MIT
