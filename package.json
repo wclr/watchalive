@@ -5,7 +5,7 @@
     "javascript"
   ],
   "version": "1.0.2",
-  "reposit": {
+  "repository": {
     "type": "git",
     "url": "git://github.com/whitecolor/watchalive.git"
   },
