@@ -152,10 +152,10 @@ The default config gives you a <b>quick look</b> on all options and default valu
         },
         clients: {
             badge: true, // show badge on client (NOT IMPLEMENTED, badge always shown)
-            reload: false, // if clients should be reloaded on change events
+            reload: true, // if clients should be reloaded on change events
             console: false, // should console be intercepted on clients
             allowMessages: true, // show custom message (NOT IMPLEMENTED)
-            sendData: false // send changed files data to client
+            data: false // send changed files data to client, if `true` reload will be `false`
         }
     }
 ```
@@ -283,9 +283,10 @@ Delay before change event is called (helps to prevent multiple change events for
 
 Interval to pool file system (`fs.watch` parameter)
 
-###### clients.sendData, `Boolean`, `false`
+###### clients.data, `Boolean`, `false`
 
 Should or not changed files data be sent to client, if enabled file changes then are sent as array of `{file: ..., data: ...}`
+If `data` is set, `reload` option will be `false`
 
 
 ### Routes
