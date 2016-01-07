@@ -1,33 +1,64 @@
-# Watchalive!
+# Watchalive.
 
-> Serve, watch, compile sources, receive events/data and trigger custom actions in browsers.
+## A small dev server with smart file watching and transform support.
 
-## Features
+### Generally includes:
+- http serving server (express)
+- lean and smart file watcher (chokidar)
+- socket.io server and client
 
-- Serves development sources and assets using its own HTTP server.
-- Watches file changes and sends the events/date to the client (default action on file change is page reload), using web sockets.
-- Compiles (transpiles) resources and watches the dependencies for changes. Can be easily extended via transpile plugins. Currently bundled with LESS/CSS plugin out of the box.
-- Can proxy and route requests or use custom middleware to handle requests.
-- Fully configurable.
-
-## Advantages
-
-Advantages over other solutions like `livereload`, `live-server`, `browser-sync`, etc:
-
-- Watches only files served to clients.
-- Caches watched files, so loading time of client page is faster.
-- Simple and flexible transpiler plugin system, allows you to serve any sources like `*.coffee, *.scss, *.less, etc` in transparent manner without need to have compiled version on the drive (or compile it on the client runtime which is often slower then do it on dev server).
-- Notifies client side about particular changes (by default send list of changed files urls).
-- Can send source (compiled/transpiled) date of changed files.
-- Watches aslo dependencies of transpiled sources (like `@import` deslarations) for changes.
-- You are free to do what ever you want with change events data: reload page, do live refresh of css styles, or hot replacement of JS modules, run test, whatever.
-- Supports flexible routes and proxies configuration.
+### Other useful stuff:
+- watch only served (requested by client) files, client gets notified about changes
+- transforms (transpiles/builds) files using simple plugins
+- can have custom routes
+- proxies requests
 
 ## Installation and usage
 
 > npm install watchalive
+> npm install watchalive -g (if want to use as CLI)
 
-### Server side usage:
+Example configuration file (for using with SystemJS loader):
+
+```
+var babel = require('babel-core')
+
+module.exports = {
+    debug: true,
+    base: "..",
+    skip: [/node_modules/],
+    skipExcept: [/react/],
+    plugin: [
+        ["less", {paths: ['client']}],
+        [/\.js$/, {
+            transform: (source) =>
+                babel.transform(source, {
+                    presets: ["es2015", 'react'],
+                    plugins: [
+                        ['react-transform', {
+                            transforms: [
+                                {transform: 'react-transform-jspm-hmr'}
+                            ]
+                        }]
+                    ]
+                }).code
+        }]
+    ],
+    route: [
+        {'/mobile': '/client/mobile/index.html'},
+        {'*': '/client/web/index.html'}
+    ],
+    proxy: {
+        '/api': 'my-app.dev:2000'
+    },
+    data: true
+}
+```
+
+### Everything is simple, but a lot of config can be done:
+
+
+### Node usage:
 
 ```javascript
 var Watchalive = require('watchalive')
@@ -49,7 +80,6 @@ wa.start()
 After this watchalive is available http://localhost:7000
 
 This is a flat version of config (some options may overlap, use consciously). You can give more structure to it (see `Default Config`).
-
 
 
 #### Command line usage

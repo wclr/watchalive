@@ -7,6 +7,7 @@ var fs = require('fs'),
 var configPaths = [
     path.resolve(argv.config || argv._[0] || 'watchalive.json'),
     path.resolve('watchalive.js'),
+    path.resolve('watchalive.config.js'),
     path.resolve('package.json')
 ]
 
