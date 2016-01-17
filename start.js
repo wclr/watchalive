@@ -9,6 +9,8 @@ var configPaths = [
   path.resolve(argv.config || argv._[0] || 'watchalive.json'),
   path.resolve('watchalive.js'),
   path.resolve('watchalive.config.js'),
+  path.resolve('wa.config.js'),
+  path.resolve('wa.js'),
   path.resolve('package.json')
 ]
 

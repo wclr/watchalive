@@ -13,14 +13,16 @@ A small dev server with smart file watching and transform support.
 - can have custom routes
 - proxies requests
 
-### Installation and usage
+### Usage
 
-- npm install watchalive
-- npm install watchalive -g (if want to use as CLI)
+- npm install watchalive -g (CLI, preferred usage)
 
+Place watchalive.config.js (or just `watchalive.js` or `wa.config.js` as you like) in your project folder. 
+Run "watchalive" cmd.
 Example configuration file (for using with SystemJS loader):
 
 ```javascript
+"use strict"
 var babel = require('babel-core')
 
 module.exports = {
@@ -55,5 +57,22 @@ module.exports = {
     data: true
 }
 ```
+ 
+ You can also place config in `package.json` in `"watchalive"` section.
+ 
+ Also you can run without config file:
+ > watchalive --port 7007
 
-[Deep dive in options!](lib/config.js#L51) 
+### API Usage
+
+- npm install watchalive
+
+```javascript
+"use strict"
+const Watchalive = require('watchalive')
+ 
+var wa = new Watchalive({/*config */})
+
+```
+
+[Deep dive into options!](lib/config.js#L51) 
