@@ -3,22 +3,23 @@
 A small but robust dev server with smart file watching and transform support.
 
 ### Generally:
-- http serving server (express)
-- lean and smart file watcher (chokidar)
+- http express server
+- lean and smart file watcher
 - socket.io server and client
 
-### Other useful stuff:
-- watch only served (requested by client) files, client gets notified about changes
-- transforms (transpiles/builds) files using simple plugins
-- can have custom routes
-- proxies requests
+### Useful features:
+- watches only served (requested by client) files
+- transforms (transpiles/compiles) files on the fly using simple plugins
+- handles custom routes
+- proxies requests to other services
+- client gets notified about changes including changed sources
 
-### Usage
+### Usage (CLI)
 
-- npm install watchalive -g (CLI, preferred usage)
+- npm install watchalive -g
 
 Place `watchalive.config.js` (or just `watchalive.js` or `wa.config.js` as you like) in your project folder. 
-Run `"watchalive"` from cmd line.
+Run `"watchalive"` from command line.
 
 Example configuration file (loading React.js transformed files with SystemJS loader):
 
@@ -27,10 +28,8 @@ Example configuration file (loading React.js transformed files with SystemJS loa
 var babel = require('babel-core')
 
 module.exports = {
-    debug: true, // debug mode
-    base: "..", // base serve directory
-    skip: [/node_modules/], // won't watch, cache and transpile
-    // transformer plugins 
+    base: "..", // base serve directory, relative to process.cwd()
+    skip: [/node_modules/], // won't watch, cache and transpile     
     plugin: [
         ["less", {paths: ['client']}], // standard less/css plugin
         [/\.js$/, (source) => // custom transformer
@@ -62,9 +61,9 @@ module.exports = {
  You can also place config in `package.json` in `"watchalive"` section.
  
  Also you can run without config file:
- > watchalive --port 7007
+ - watchalive --port 7007
 
-### API Usage
+### API usage
 
 - npm install watchalive
 
@@ -77,4 +76,17 @@ var wa = new Watchalive({/*config */})
 wa.start()
 ```
 
-[Deep dive into options!](lib/default-config.js) 
+[Deep dive into options!](lib/default-config.js)
+
+### Client side usage
+By default served *.html files get `watchalive.js` client script injected.
+You can easily access to this notifications in code:
+```javascript
+    watchalive.onFiles(function(changes){
+        // *changes* contain array of file names changed
+        // can also contain changed file sources {file: ..., data: ...}
+    })
+``` 
+
+### Licence
+MIT
