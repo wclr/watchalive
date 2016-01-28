@@ -1,6 +1,6 @@
 ## Watchalive.
 
-A small dev server with smart file watching and transform support.
+A small but robust dev server with smart file watching and transform support.
 
 ### Generally:
 - http serving server (express)
@@ -17,9 +17,10 @@ A small dev server with smart file watching and transform support.
 
 - npm install watchalive -g (CLI, preferred usage)
 
-Place watchalive.config.js (or just `watchalive.js` or `wa.config.js` as you like) in your project folder. 
-Run "watchalive" cmd.
-Example configuration file (for using with SystemJS loader):
+Place `watchalive.config.js` (or just `watchalive.js` or `wa.config.js` as you like) in your project folder. 
+Run `"watchalive"` from cmd line.
+
+Example configuration file (loading React.js transformed files with SystemJS loader):
 
 ```javascript
 "use strict"
@@ -31,7 +32,7 @@ module.exports = {
     skip: [/node_modules/], // won't watch, cache and transpile
     // transformer plugins 
     plugin: [
-        ["less", {paths: ['client']}], // standard less plugin
+        ["less", {paths: ['client']}], // standard less/css plugin
         [/\.js$/, (source) => // custom transformer
               babel.transform(source, {
                   presets: ["es2015", 'react'],
@@ -54,7 +55,7 @@ module.exports = {
     proxy: {
         '/api': 'my-app.dev:2000'
     },
-    data: true
+    data: true // send source of changed file with notification message 
 }
 ```
  
@@ -73,6 +74,7 @@ const Watchalive = require('watchalive')
  
 var wa = new Watchalive({/*config */})
 
+wa.start()
 ```
 
-[Deep dive into options!](lib/config.js#L51) 
+[Deep dive into options!](lib/default-config.js) 
