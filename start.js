@@ -14,7 +14,9 @@ var configPaths = [
   path.resolve('package.json')
 ]
 
-console.log('Starting WATCHALIVE DEV SERVER...')
+var version = require('./package.json').version
+
+console.log('Starting WATCHALIVE DEV SERVER (version ' + version + ')...')
 
 var getConfig = function(configPath){
 
