@@ -1,22 +1,24 @@
-## Watchalive.
+# Watchalive.
 
-A small but robust dev server with smart file watching and transform support.
+A small but **robust dev server** with smart file watching and transform support.
 
-### Generally:
+## Generally:
 - http express server
 - lean and smart file watcher
 - socket.io server and client
 
-### Useful features:
+## Useful features:
 - watches only served (requested by client) files
 - transforms (transpiles/compiles) files on the fly using simple plugins
 - handles custom routes
 - proxies requests to other services
 - client gets notified about changes including changed sources
 
-### Usage (CLI)
+## Usage (CLI)
 
-- npm install watchalive -g
+```bash
+npm install watchalive -g
+```
 
 Place `watchalive.config.js` (or just `watchalive.js` or `wa.config.js` as you like) in your project folder. 
 Run `"watchalive"` from command line.
@@ -61,11 +63,15 @@ module.exports = {
  You can also place config in `package.json` in `"watchalive"` section.
  
  Also you can run without config file:
- - watchalive --port 7007
+ ```bash
+ watchalive --port 7007 --base ..
+ ```
 
 ### API usage
 
-- npm install watchalive
+```bash
+npm install watchalive
+```
 
 ```javascript
 "use strict"
@@ -87,6 +93,10 @@ You can easily access to this notifications in code:
         // can also contain changed file sources {file: ..., data: ...}
     })
 ``` 
+
+### Examples of usage
+- [CanJS hot reloading](https://github.com/whitecolor/can-hot)
+- [Hot reloading with Steal-HMR](https://github.com/whitecolor/steal-hmr)
 
 ### Licence
 MIT

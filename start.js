@@ -47,19 +47,8 @@ configPaths.every(function(configPath){
 
 config = config || {}
 
-//var _arg0 = argv['_'][0]
-//var _arg1 = argv['_'][1]
-//
-//if (parseInt(_arg0)){
-//  config.port = parseInt(_arg0)
-//  if (_arg1){
-//    config.base = _arg1
-//  }
-//} else if (_arg0){
-//  config.base = _arg1
-//}
-
 for (var arg in argv){
+
   if (arg !== '_'){
     config[camelize(arg)] = argv[arg]
   }
