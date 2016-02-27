@@ -47,8 +47,7 @@ configPaths.every(function(configPath){
 
 config = config || {}
 
-for (var arg in argv){
-
+for (var arg in argv) {
   if (arg !== '_'){
     config[camelize(arg)] = argv[arg]
   }

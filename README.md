@@ -14,6 +14,9 @@ A small but **robust dev server** with smart file watching and transform support
 - proxies requests to other services
 - client gets notified about changes including changed sources
 
+If you have question you may ping on gitter 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/whitecolor/watchalive?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge)
+
 ## Usage (CLI)
 
 ```bash
